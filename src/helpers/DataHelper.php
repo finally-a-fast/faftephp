@@ -1,0 +1,105 @@
+<?php
+
+declare(strict_types=1);
+
+namespace fafte\helpers;
+
+use fafte\FafteParser;
+use Exception;
+
+/**
+ * Class DataHelper
+ *
+ * @package fafcms\parser\helpers
+ */
+class DataHelper extends BaseObject
+{
+    /**
+     * @var string
+     */
+    public string $name;
+
+    /**
+     * @param string $name
+     *
+     * @return $this
+     */
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return $this
+     */
+    public function setValue($value): self
+    {
+        $this->value = $value;
+        return $this;
+    }
+
+    /**
+     * @var mixed
+     */
+    public $value;
+
+    /**
+     * @param string      $name
+     * @param             $value
+     * @param FafteParser $parser
+     */
+    private static function setData(string $name, $value, FafteParser $parser): void
+    {
+        $parser->setAttributeData($name, $value);
+    }
+
+    /**
+     * @param array       $rawParams
+     * @param bool        $setAttributeData
+     * @param FafteParser $parser
+     *
+     * @return array
+     * @throws Exception
+     */
+    public static function formatParams(array $rawParams, bool $setAttributeData, FafteParser $parser): array
+    {
+        $params = [];
+
+        foreach ($rawParams as $name => $value) {
+            if ($value instanceof self) {
+                $name  = $value->name;
+                $value = $value->value;
+            }
+
+            if ($name === null) {
+                if ($setAttributeData) {
+                    throw new Exception('To set data the name attribute is required.');
+                }
+
+                $params[] = self::formatValue($value, $parser);
+            } else {
+                $params[$name] = self::formatValue($value, $parser);
+
+                if ($setAttributeData) {
+                    self::setData($name, $params[$name], $parser);
+                }
+            }
+        }
+
+        return $params;
+    }
+
+    /**
+     * @param mixed       $value
+     * @param FafteParser $parser
+     *
+     * @return mixed
+     */
+    public static function formatValue($value, FafteParser $parser)
+    {
+        return $parser->getRawValue($value);
+    }
+}

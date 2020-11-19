@@ -1,0 +1,122 @@
+# This file is a template, and might need editing before it works on your project.
+# Select image from https://hub.docker.com/_/php/
+image: php:7.4.0-cli
+
+before_script:
+    - apt-get update -yqq
+    - apt-get install -yqq rsync git libmcrypt-dev libpq-dev libcurl4-gnutls-dev libicu-dev libvpx-dev libjpeg-dev libpng-dev libxpm-dev zlib1g-dev libfreetype6-dev libxml2-dev libexpat1-dev libbz2-dev libgmp3-dev libldap2-dev unixodbc-dev libsqlite3-dev libaspell-dev libsnmp-dev libpcre3-dev libtidy-dev zip unzip
+    # Install PHP extensions
+    # - docker-php-ext-install mbstring mcrypt  curl json intl gd xml zip bz2 opcache
+    #- docker-php-ext-install zip bz2
+    # Install & enable Xdebug for code coverage reports
+    #- pecl install xdebug
+    #- docker-php-ext-enable xdebug
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - eval $(ssh-agent -s)
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh-add <(echo "$GIT_SSH_PRIV_KEY")
+    - git config --global user.email "bot@finally-a-fast.com"
+    - git config --global user.name "FAF Bot"
+    - curl -sS https://getcomposer.org/installer | php
+
+# Bring in any services we need http://docs.gitlab.com/ee/ci/docker/using_docker_images.html#what-is-a-service
+# See http://docs.gitlab.com/ce/ci/services/README.html for examples.
+
+
+# Set any variables we need
+variables:
+    # Configure mysql environment variables (https://hub.docker.com/r/_/mysql/)
+    MYSQL_DATABASE: mysql_database
+    MYSQL_ROOT_PASSWORD: mysql_strong_password
+
+stages:
+    - build
+    #    - test
+    - docs
+    - deploy
+
+build:
+    stage: build
+    only:
+        - dev
+        - build
+    script:
+        - mkdir build
+        - ls -lisa
+        - rsync -Rr . ./build/
+        - mv build/composer.json build/composer.json.real
+        - sed -e "s;${CI_PROJECT_PATH};temp/composer;g" build/composer.json.real > build/composer.json
+        - php composer.phar update -d build
+        - mv build/composer.json.real build/composer.json
+        - php composer.phar build -d build
+    artifacts:
+        paths:
+            - build
+        expire_in: 1 day
+
+# Run our tests
+# If Xdebug was installed you can generate a coverage report and see code coverage metrics.
+#
+#test:
+#        services:
+#            - mysql:5.7
+#    stage: test
+#    only:
+#        - dev
+#        - build
+#    script:
+#        - echo "test"
+##    - vendor/bin/phpunit --configuration phpunit.xml --coverage-text --colors=never
+
+docs:
+    stage: docs
+    only:
+        - build
+    script:
+        - "[ ! -d \"phpDocumentor\" ] && git clone https://github.com/phpDocumentor/phpDocumentor.git"
+        - git --git-dir=phpDocumentor/.git --work-tree=phpDocumentor pull
+        - php composer.phar install -d phpDocumentor
+        - cd build
+        - ../phpDocumentor/bin/phpdoc
+        - rm -rf ../docs
+        - mv docs ../docs
+    artifacts:
+        paths:
+            - docs
+        expire_in: 1 day
+
+merge:
+    stage: deploy
+    only:
+        - build
+    script:
+        - git clone git@gitlab.com:${CI_PROJECT_PATH}.git
+        - cd ${CI_PROJECT_NAME}
+        - git checkout dev
+        - git checkout master
+        - git merge -s recursive -X theirs dev || git commit -a -m "Merged conflict from pipeline ${CI_PIPELINE_ID}"
+        - rm -rf *
+        - cp -r ../build/* .
+        - rm -rf docs
+        - git add --all
+        - git commit -a -m "Created build from pipeline ${CI_PIPELINE_ID}" || echo "No build changes"
+        - git push
+        - git checkout docs
+        - rm -rf *
+        - cp -r ../docs/* .
+        - git add --all
+        - git commit -a -m "Updated docs from pipeline ${CI_PIPELINE_ID}" || echo "No docs changes"
+        - git push
+
+upload:
+    stage: deploy
+    only:
+        - build
+    script:
+        - echo "uploaded"
+##    - ssh-add <(echo "$STAGING_PRIVATE_KEY")
+##    - ssh -p2112 faf-production@www.finally-a-fast.com "mkdir _tmp"
+##    - scp -p2112 -r build/* faf-production@www.finally-a-fast.com:_tmp
+##    - ssh -p2112 faf-production@www.finally-a-fast.com "mv html _old && mv _tmp html"
+##    - ssh -p2112 faf-production@www.finally-a-fast.com "rm -rf _foo"
