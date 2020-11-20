@@ -1,15 +1,15 @@
 {
-    "name": "finally-a-fast/fafte",
+    "name": "finally-a-fast/faftephp",
     "keywords": [
-        "fafte"
+        "faftephp"
     ],
     "type": "yii2-extension",
     "license": "MIT",
     "homepage": "https://www.finally-a-fast.com/",
     "support": {
-        "issues": "https://gitlab.com/finally-a-fast/fafte/issues",
-        "source": "https://gitlab.com/finally-a-fast/fafte",
-        "docs": "https://www.finally-a-fast.com/packages/fafte/docs"
+        "issues": "https://gitlab.com/finally-a-fast/faftephp/issues",
+        "source": "https://gitlab.com/finally-a-fast/faftephp",
+        "docs": "https://www.finally-a-fast.com/packages/faftephp/docs"
     },
     "authors": [
         {
@@ -52,7 +52,7 @@
     },
     "autoload": {
         "psr-4": {
-            "fafte\\": "src"
+            "faftephp\\": "src"
         }
     },
     "repositories": [
