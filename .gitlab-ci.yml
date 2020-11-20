@@ -11,7 +11,7 @@ before_script:
     # Install PHP extensions
     - docker-php-source extract
     - mkdir -p /usr/src/php/ext/apcu
-    - curl -fsSL https://github.com/krakjoe/apcu/archive/v$EXT_APCU_VERSION.tar.gz | tar xvz -C /usr/src/php/ext/apcu --strip 1
+    - curl -fsSL https://github.com/krakjoe/apcu/archive/v5.1.19.tar.gz | tar xvz -C /usr/src/php/ext/apcu --strip 1
     - docker-php-ext-install apcu
     - docker-php-source delete
     - docker-php-ext-install mbstring curl json intl gd xml zip bz2 opcache dom
