@@ -12,9 +12,7 @@ before_script:
     - docker-php-source extract
     - mkdir -p /usr/src/php/ext/apcu
     - curl -fsSL https://github.com/krakjoe/apcu/archive/v5.1.19.tar.gz | tar xvz -C /usr/src/php/ext/apcu --strip 1
-    - docker-php-ext-install apcu
-    - docker-php-source delete
-    - docker-php-ext-install mbstring curl json intl gd xml zip bz2 opcache dom
+    - docker-php-ext-install apcu mbstring curl json intl gd xml zip bz2 opcache dom
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
     - eval $(ssh-agent -s)
