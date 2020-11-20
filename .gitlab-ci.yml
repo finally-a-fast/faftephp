@@ -4,7 +4,7 @@ image: php:7.4.0-cli
 
 before_script:
     - apt-get update -yqq
-    - apt-get install -yqq rsync git libmcrypt-dev libpq-dev libcurl4-gnutls-dev libicu-dev libvpx-dev libjpeg-dev libpng-dev libxpm-dev zlib1g-dev libfreetype6-dev libxml2-dev libexpat1-dev libbz2-dev libgmp3-dev libldap2-dev unixodbc-dev libsqlite3-dev libaspell-dev libsnmp-dev libpcre3-dev libtidy-dev zip unzip
+    - apt-get install -yqq rsync git libonig-dev libmcrypt-dev libpq-dev libcurl4-gnutls-dev libicu-dev libvpx-dev libjpeg-dev libpng-dev libxpm-dev zlib1g-dev libfreetype6-dev libxml2-dev libexpat1-dev libbz2-dev libgmp3-dev libldap2-dev unixodbc-dev libsqlite3-dev libaspell-dev libsnmp-dev libpcre3-dev libtidy-dev zip unzip
     # Install & enable Xdebug for code coverage reports
     #- pecl install xdebug
     #- docker-php-ext-enable xdebug
@@ -12,7 +12,8 @@ before_script:
     - docker-php-source extract
     - mkdir -p /usr/src/php/ext/apcu
     - curl -fsSL https://github.com/krakjoe/apcu/archive/v5.1.19.tar.gz | tar xvz -C /usr/src/php/ext/apcu --strip 1
-    - docker-php-ext-install apcu mbstring curl json intl gd xml zip bz2 opcache dom
+    - docker-php-ext-install apcu curl json intl gd xml zip bz2 opcache dom
+    - docker-php-source delete
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
     - eval $(ssh-agent -s)
