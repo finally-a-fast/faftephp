@@ -6,6 +6,7 @@
 [![PHP Version](https://img.shields.io/packagist/php-v/finally-a-fast/faftephp/dev-master?style=flat-square)](https://www.php.net/downloads.php)
 [![License](https://img.shields.io/packagist/l/finally-a-fast/faftephp?style=flat-square)](https://packagist.org/packages/finally-a-fast/faftephp)
 [![Total Downloads](https://img.shields.io/packagist/dt/finally-a-fast/faftephp?style=flat-square)](https://packagist.org/packages/finally-a-fast/faftephp)
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://gitlab.com/finally-a-fast/faftephp)
 
 
 This is a simple and fast template engine for php.
