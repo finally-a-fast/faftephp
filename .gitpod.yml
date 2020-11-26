@@ -8,4 +8,5 @@ tasks:
   - init: >
       composer update
     command: >
+      cd examples
       php -S localhost:8000
