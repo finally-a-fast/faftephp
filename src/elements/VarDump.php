@@ -26,6 +26,14 @@ class VarDump extends ParserElement
     /**
      * {@inheritdoc}
      */
+    public function aliases(): array
+    {
+        return ['vardump'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function description(): string
     {
         return 'Dumps information about a variable.';
@@ -60,8 +68,9 @@ class VarDump extends ParserElement
     public function run()
     {
         ob_start();
-        ob_implicit_flush(0);
+        ob_implicit_flush(PHP_VERSION >= 8 ? false : 0);
         var_dump($this->data['params']);
+
         return ob_get_clean();
     }
 }
