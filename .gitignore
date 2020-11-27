@@ -30,3 +30,9 @@ composer.lock
 
 # Mac DS_Store Files
 .DS_Store
+
+# sample files
+/examples/parser.log
+
+# gitpod
+/.theia
