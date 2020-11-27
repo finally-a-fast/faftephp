@@ -6,21 +6,28 @@ namespace fafte\elements;
 
 use fafte\helpers\ElementSetting;
 use fafte\helpers\ParserElement;
-use Yiisoft\Validator\Rule\Required;
 
 /**
- * Class VarDump
+ * Class ConditionalStatementConditionTypeSafeEqual
  *
  * @package fafte\elements
  */
-class VarDump extends ParserElement
+class ConditionalStatementConditionTypeSafeEqual extends ParserElement
 {
     /**
      * {@inheritdoc}
      */
     public function name(): string
     {
-        return 'var-dump';
+        return 'conditional-statement-condition-type-safe-equal';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function aliases(): array
+    {
+        return ['condition-type-safe-equal', 'type-safe-equal'];
     }
 
     /**
@@ -28,7 +35,7 @@ class VarDump extends ParserElement
      */
     public function description(): string
     {
-        return 'Dumps information about a variable.';
+        return 'Returns true if param 1 is equal to param 2 and have the same type.';
     }
 
     /**
@@ -43,25 +50,32 @@ class VarDump extends ParserElement
                 'element' => Param::class,
                 'rawData' => true,
                 'content' => true,
-                'attributeNameAsKey' => true,
                 'multiple' => true,
                 'multipleAttributeExpression' => '/^(.*)?$/i',
-                'rules' => [
-                    new Required(),
-                ]
             ]),
         ];
     }
 
     /**
      * {@inheritdoc}
-     * @throws \Exception
+     */
+    public function allowedParents(): ?array
+    {
+        return [
+            ConditionalStatementCondition::class,
+            ConditionalStatementConditionAnd::class,
+            ConditionalStatementConditionOr::class
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return bool|mixed
      */
     public function run()
     {
-        ob_start();
-        ob_implicit_flush(0);
-        var_dump($this->data['params']);
-        return ob_get_clean();
+        $params = ConditionalStatement::getParams($this->data['params']);
+
+        return ($params[0] === $params[1]);
     }
 }

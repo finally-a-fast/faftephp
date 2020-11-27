@@ -46,6 +46,9 @@ class Round extends ParserElement
             new ElementSetting([
                 'name' => 'precision',
                 'label' => 'Precision',
+                'aliases' => [
+                    'decimals'
+                ],
                 // TODO element
                 //The optional number of decimal digits to round to.
                 'defaultValue' => 0,

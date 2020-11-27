@@ -84,6 +84,7 @@ class Call extends ParserElement
         $rawParams = $this->data['params'];
         unset($rawParams['function'], $rawParams['callable'], $rawParams['name']);
 
+        //TODO this can get removed
         $params = DataHelper::formatParams($rawParams, false, $this->parser);
 
         return call_user_func_array($closure, $params);

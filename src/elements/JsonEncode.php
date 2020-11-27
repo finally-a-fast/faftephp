@@ -39,19 +39,17 @@ class JsonEncode extends ParserElement
             new ElementSetting([
                 'name' => 'data',
                 'label' => 'Data',
-                'content' => true,
-                'rules' => [
-                    new Required(),
-                ]
+                'content' => true
             ]),
         ];
     }
 
     /**
      * {@inheritdoc}
+     * @throws \JsonException
      */
     public function run()
     {
-        return json_encode($this->parser->getAttributeData($this->content), JSON_HEX_TAG);
+        return json_encode($this->data['data'], JSON_THROW_ON_ERROR | JSON_HEX_TAG);
     }
 }

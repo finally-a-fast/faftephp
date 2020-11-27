@@ -7,18 +7,28 @@ namespace fafte\elements;
 use fafte\helpers\ParserElement;
 
 /**
- * Class FormatAsTimeString
+ * Class ConditionalStatementCondition
  *
  * @package fafte\elements
  */
-class FormatAsTimeString extends ParserElement
+class ConditionalStatementCondition extends ParserElement
 {
+    public bool $contentAsRawData = true;
+
     /**
      * {@inheritdoc}
      */
     public function name(): string
     {
-        return 'format-as-time-string';
+        return 'conditional-statement-condition';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function aliases(): array
+    {
+        return ['condition', 'if-condition'];
     }
 
     /**
@@ -26,7 +36,7 @@ class FormatAsTimeString extends ParserElement
      */
     public function description(): string
     {
-        return 'The input string.';
+        return 'Condition which gets evaluated.';
     }
 
     /**
@@ -34,7 +44,7 @@ class FormatAsTimeString extends ParserElement
      */
     public function allowedParents(): ?array
     {
-        return [FormatAsTime::class];
+        return [ConditionalStatement::class];
     }
 
     /**

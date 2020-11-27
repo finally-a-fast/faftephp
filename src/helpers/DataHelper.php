@@ -15,16 +15,16 @@ use Exception;
 class DataHelper extends BaseObject
 {
     /**
-     * @var string
+     * @var string|int|null
      */
-    public string $name;
+    public $name;
 
     /**
-     * @param string $name
+     * @param string|int|null $name
      *
      * @return $this
      */
-    public function setName(string $name): self
+    public function setName($name): self
     {
         $this->name = $name;
         return $this;

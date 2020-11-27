@@ -26,6 +26,14 @@ class Param extends ParserElement
     /**
      * {@inheritdoc}
      */
+    public function aliases(): array
+    {
+        return ['param-1', 'param-2'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function description(): string
     {
         return 'Gets a data param.';
@@ -57,7 +65,7 @@ class Param extends ParserElement
      */
     public function run()
     {
-        $this->data['value'] = $this->parser->getRawValue($this->parser->parseElements($this->parser->getSafeValue($this->data['value']), $this->tagName(), true));
+        $this->data['value'] = $this->parser->getRawValue($this->parser->parseElements((string)$this->data['value'], $this->tagName(), true));
         return new DataHelper($this->data);
     }
 }

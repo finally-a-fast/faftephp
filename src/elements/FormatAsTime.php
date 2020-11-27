@@ -55,6 +55,7 @@ class FormatAsTime extends ParserElement
                 'label' => 'String',
                 'element' => FormatAsTimeString::class,
                 'content' => true,
+                'defaultValue' => 'NOW',
                 'rules' => [
                     new Required(),
                 ]

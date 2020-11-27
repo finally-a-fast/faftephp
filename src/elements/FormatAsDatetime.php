@@ -55,6 +55,7 @@ class FormatAsDatetime extends ParserElement
                 'label' => 'String',
                 'element' => FormatAsDatetimeString::class,
                 'content' => true,
+                'defaultValue' => 'NOW',
                 'rules' => [
                     new Required(),
                 ]

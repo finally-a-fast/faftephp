@@ -6,11 +6,14 @@ namespace fafte;
 
 use Closure;
 
+use DateTime;
+use DateTimeZone;
 use fafte\elements\Trim;
 use fafte\elements\TrimString;
 use fafte\elements\TrimCharlist;
 use IntlCalendar;
 use IntlDateFormatter;
+use IntlTimeZone;
 use IvoPetkov\HTML5DOMElement;
 use IvoPetkov\HTML5DOMDocument;
 use DOMXPath;
@@ -19,6 +22,28 @@ use fafte\elements\{Base64Decode,
     Base64Encode,
     Call,
     CallFunction,
+    ConditionalStatement,
+    ConditionalStatementCondition,
+    ConditionalStatementConditionAnd,
+    ConditionalStatementConditionEmpty,
+    ConditionalStatementConditionEndsNotWith,
+    ConditionalStatementConditionEndsWith,
+    ConditionalStatementConditionEqual,
+    ConditionalStatementConditionFalse,
+    ConditionalStatementConditionGreaterEqualThan,
+    ConditionalStatementConditionGreaterThan,
+    ConditionalStatementConditionLessEqualThan,
+    ConditionalStatementConditionLessThan,
+    ConditionalStatementConditionNotEmpty,
+    ConditionalStatementConditionOr,
+    ConditionalStatementConditionStartsNotWith,
+    ConditionalStatementConditionStartsWith,
+    ConditionalStatementConditionTrue,
+    ConditionalStatementConditionTypeSafeEqual,
+    ConditionalStatementConditionTypeSafeNotEqual,
+    ConditionalStatementElse,
+    ConditionalStatementThen,
+    ConditionalStatementConditionNotEqual,
     FormatAsDate,
     FormatAsDateFormat,
     FormatAsDateString,
@@ -103,7 +128,7 @@ class FafteParser extends BaseObject
     /**
      * @var array|string[]
      */
-    public array $elements = [
+    protected array $elements = [
         Base64Encode::class,
         Call::class,
         CallFunction::class,
@@ -158,6 +183,28 @@ class FafteParser extends BaseObject
         StrReplaceSubject::class,
         TimeTag::class,
         Base64Decode::class,
+        ConditionalStatement::class,
+        ConditionalStatementConditionNotEqual::class,
+        ConditionalStatementConditionEqual::class,
+        ConditionalStatementConditionTypeSafeEqual::class,
+        ConditionalStatementConditionTypeSafeNotEqual::class,
+        ConditionalStatementConditionEndsWith::class,
+        ConditionalStatementConditionEndsNotWith::class,
+        ConditionalStatementConditionStartsWith::class,
+        ConditionalStatementConditionStartsNotWith::class,
+        ConditionalStatementConditionTrue::class,
+        ConditionalStatementConditionFalse::class,
+        ConditionalStatementConditionEmpty::class,
+        ConditionalStatementConditionNotEmpty::class,
+        ConditionalStatementConditionLessThan::class,
+        ConditionalStatementConditionLessEqualThan::class,
+        ConditionalStatementConditionGreaterThan::class,
+        ConditionalStatementConditionGreaterEqualThan::class,
+        ConditionalStatementThen::class,
+        ConditionalStatementElse::class,
+        ConditionalStatementCondition::class,
+        ConditionalStatementConditionAnd::class,
+        ConditionalStatementConditionOr::class,
     ];
 
     public ?LoggerInterface $logger = null;
@@ -210,7 +257,7 @@ class FafteParser extends BaseObject
     /**
      * @var array
      */
-    protected array $nodeDatas = [];
+    protected array $nodeStats = [];
 
     /**
      * @var array
@@ -250,6 +297,57 @@ class FafteParser extends BaseObject
 
     //region getter and setter
     /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return $this
+     */
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * @return array|string[]
+     */
+    public function getElements()
+    {
+        return $this->elements;
+    }
+
+    /**
+     * @param array|string[] $elements
+     *
+     * @return FafteParser
+     */
+    public function setElements($elements)
+    {
+        $this->elements = $elements;
+        $this->refresh();
+        return $this;
+    }
+
+    /**
+     * @param array|string[] $elements
+     *
+     * @return FafteParser
+     */
+    public function addElements($elements)
+    {
+        $this->elements = array_merge($this->elements, $elements);
+        $this->refresh();
+        return $this;
+    }
+
+    /**
      * @return int
      */
     public function getCurrentDeep(): int
@@ -266,6 +364,14 @@ class FafteParser extends BaseObject
     }
 
     /**
+     * @return int
+     */
+    public function getType(): int
+    {
+        return $this->type;
+    }
+
+    /**
      * @param int $type
      *
      * @return $this
@@ -273,8 +379,20 @@ class FafteParser extends BaseObject
     public function setType(int $type): self
     {
         $this->type = $type;
-
+        $this->refresh();
         return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLanguage(): ?string
+    {
+        if ($this->language === null) {
+            $this->language = Locale::getDefault();
+        }
+
+        return $this->language;
     }
 
     /**
@@ -284,8 +402,10 @@ class FafteParser extends BaseObject
      */
     public function setLanguage(?string $language): self
     {
-        if ($language !== null) {
-            $this->language = strtolower($language);
+        $this->language = $language;
+
+        if ($this->language !== null) {
+            $this->language = strtolower($this->language);
         }
 
         return $this;
@@ -296,7 +416,7 @@ class FafteParser extends BaseObject
      *
      * @return $this
      */
-    public function setData($data): self
+    public function setData(&$data): self
     {
         $this->data = &$data;
 
@@ -340,15 +460,30 @@ class FafteParser extends BaseObject
     }
 
     /**
-     * @param $returnRawData
-     *
-     * @return $this
+     * @return bool
      */
-    public function setReturnRawData($returnRawData): self
+    public function getReturnRawData(): bool
+    {
+        return $this->returnRawData;
+    }
+
+    /**
+     * @param bool $returnRawData
+     *
+     * @return FafteParser
+     */
+    public function setReturnRawData(bool $returnRawData): self
     {
         $this->returnRawData = $returnRawData;
-
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getNodeStats(): array
+    {
+        return $this->nodeStats;
     }
     //endregion getter and setter
 
@@ -396,9 +531,14 @@ class FafteParser extends BaseObject
 
         $this->tempTagName = 'temp-tag-' . $this->name . '-temp-tag';
 
-        if ($this->language === null) {
-            $this->language = Locale::getDefault();
-        }
+        $this->specialTagMap = [
+            '<body' => '<' . $this->tempTagName . '-body',
+            '</body' => '</' . $this->tempTagName . '-body',
+            '<head' => '<' . $this->tempTagName . '-head',
+            '</head' => '</' . $this->tempTagName . '-head',
+            '<html' => '<' . $this->tempTagName . '-html',
+            '</html' => '</' . $this->tempTagName . '-html',
+        ];
 
         $this->debugEnd($debugId);
     }
@@ -448,7 +588,7 @@ class FafteParser extends BaseObject
                             $parentElement = $this->parserElementsByClassName[$allowedParent];
 
                             foreach ($parentElement->tagNameAliases() as $tagNameAlias) {
-                                $allowedChildElements[$allowedType][$tagNameAlias][] = $parserElement;
+                                $allowedChildElements[$allowedType][$tagNameAlias][] = $currentTagName;
                             }
 
                             $allowedChildElements[$allowedType][$parentElement->tagName()][] = $currentTagName;
@@ -479,8 +619,8 @@ class FafteParser extends BaseObject
     {
         $debugId = $this->debugStart('Get allowed child elements for ' . $tagName . ' of type ' . $type);
 
-        $allowedChildElementsByType = array_merge($this->allowedChildElements[null] ?? [], $this->allowedChildElements[$type] ?? []);
-        $allowedChildElementsByTag = array_merge($allowedChildElementsByType[null] ?? [], $allowedChildElementsByType[$tagName] ?? []);
+        $allowedChildElementsByType = array_merge_recursive($this->allowedChildElements[null] ?? [], $this->allowedChildElements[$type] ?? []);
+        $allowedChildElementsByTag = array_merge_recursive($allowedChildElementsByType[null] ?? [], $allowedChildElementsByType[$tagName] ?? []);
 
         $this->debugEnd($debugId);
 
@@ -489,10 +629,10 @@ class FafteParser extends BaseObject
     //endregion child elements
 
     /**
-     * @param int                              $type
-     * @param \DateTime|string                 $dateTime
-     * @param string|int                       $format
-     * @param \IntlTimeZone|\DateTimeZone|null $timeZone
+     * @param int                            $type
+     * @param DateTime|string               $dateTime
+     * @param string|int                     $format
+     * @param IntlTimeZone|DateTimeZone|null $timeZone
      *
      * @return false|string
      */
@@ -530,9 +670,9 @@ class FafteParser extends BaseObject
     }
 
     /**
-     * @param \DateTime|string                 $dateTime
-     * @param string|int                       $format
-     * @param \IntlTimeZone|\DateTimeZone|null $timeZone
+     * @param DateTime|string               $dateTime
+     * @param string|int                     $format
+     * @param IntlTimeZone|DateTimeZone|null $timeZone
      *
      * @return false|string
      */
@@ -542,9 +682,9 @@ class FafteParser extends BaseObject
     }
 
     /**
-     * @param \DateTime|string                 $time
-     * @param string|int                       $format
-     * @param \IntlTimeZone|\DateTimeZone|null $timeZone
+     * @param DateTime|string               $time
+     * @param string|int                     $format
+     * @param IntlTimeZone|DateTimeZone|null $timeZone
      *
      * @return false|string
      */
@@ -554,9 +694,9 @@ class FafteParser extends BaseObject
     }
 
     /**
-     * @param \DateTime|string                 $date
-     * @param string|int                       $format
-     * @param \IntlTimeZone|\DateTimeZone|null $timeZone
+     * @param DateTime|string               $date
+     * @param string|int                     $format
+     * @param IntlTimeZone|DateTimeZone|null $timeZone
      *
      * @return false|string
      */
@@ -622,7 +762,7 @@ class FafteParser extends BaseObject
     public function parseElements(string $string, string $currentTagName, bool $rawData = false)
     {
         $parentLanguage = $this->currentLanguage;
-        $this->currentLanguage = $this->language;
+        $this->currentLanguage = $this->getLanguage();
 
         $parentTagName = $this->parentTagName;
         $this->parentTagName = $this->currentTagName;
@@ -633,7 +773,7 @@ class FafteParser extends BaseObject
         $parserElements = $this->getAllowedChildElements($this->type, $this->currentTagName);
 
         $dom = new HTML5DOMDocument();
-        $dom->loadHTML('<!DOCTYPE html><html><body><'.$this->tempTagName.'>' . $this->getSafeHtml($string) . '</'.$this->tempTagName.'></body></html>', LIBXML_NONET);
+        $dom->loadHTML('<!DOCTYPE html><html lang=""><body><'.$this->tempTagName.'>' . $this->getSafeHtml($string) . '</'.$this->tempTagName.'></body></html>', LIBXML_NONET | HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
 
         $xPath = new DOMXPath($dom);
         $filterReplacements = '//' . implode('|//', $parserElements);
@@ -655,6 +795,7 @@ class FafteParser extends BaseObject
         }
 
         $domNodeCount = count($domNodes);
+        $getParsedContent = false;
 
         if ($domNodeCount === 0) {
             $result = $string;
@@ -676,12 +817,12 @@ class FafteParser extends BaseObject
                 if (isset($this->parserElements[$tagName])) {
                     $tagName = $this->parserElements[$tagName]->tagName();
 
-                    if (!isset($this->nodeDatas[$tagName]['usage'])) {
-                        $this->nodeDatas[$tagName]['usage'] = 0;
+                    if (!isset($this->nodeStats[$tagName]['usage'])) {
+                        $this->nodeStats[$tagName]['usage'] = 0;
                     }
 
-                    $this->nodeDatas[$tagName]['usage']++;
-                    $this->nodeDatas[$tagName]['number'] = ($this->nodeDatas[$tagName]['number'] ?? 0) + 1;
+                    $this->nodeStats[$tagName]['usage']++;
+                    $this->nodeStats[$tagName]['number'] = ($this->nodeStats[$tagName]['number'] ?? 0) + 1;
 
                     $this->prepareNode($xPath, $domNode, $this->parserElements[$tagName], $tagName);
 
@@ -696,12 +837,10 @@ class FafteParser extends BaseObject
                     $this->parentTagName = $childParentTagName;
                     $this->currentTagName = $childCurrentTagName;
 
-                    if ($rawData) {
-                        if ($domNodeCount > 1) {
-                            $result[] = $replacement;
-                        } else {
-                            $result = $replacement;
-                        }
+                    if ($rawData && $domNodeCount > 1) {
+                        $result[] = $replacement;
+                    } elseif ($rawData && (is_array($replacement) || is_object($replacement))) {
+                        $result = $replacement;
                     } else {
                         if ($replacement !== null) {
                             if (!is_string($replacement)) {
@@ -712,21 +851,15 @@ class FafteParser extends BaseObject
                         }
 
                         $domNode->outerHTML = $replacement;
+                        $getParsedContent = true;
                     }
                 }
             }
 
             $this->currentDeep = $oldDeep;
 
-            if (!$rawData) {
-                $result = $dom->saveHTML();
-                $getResultDebugId = $this->debugStart('Get result with regex for ' . $this->currentTagName);
-
-                preg_match('/<' . $this->tempTagName . '>(?<content>.*?)<\/' . $this->tempTagName . '>/is', $result, $matches);
-                $result = preg_replace('/<'.$this->tempTagName. '-special>(?<content>[^<]+)<\/' .$this->tempTagName.'-special>/mi', '<!$1>', $matches['content'] ?? '');
-                $result = preg_replace('/(?<tag><\/?)'.$this->tempTagName. '-(?<name>[\w\d\-]+)/mi', '$1$2', $result);
-
-                $this->debugEnd($getResultDebugId);
+            if ($getParsedContent) {
+                $result = $this->getParsedContent($xPath);
             }
         }
 
@@ -735,6 +868,26 @@ class FafteParser extends BaseObject
         $this->parentTagName = $parentTagName;
 
         $this->debugEnd($parseElementDebugId);
+
+        return $result;
+    }
+
+    protected function getParsedContent($xPath): string
+    {
+        $node = $xPath->query('//' . $this->tempTagName);
+        $result = $node[0]->innerHTML;
+
+        $result = str_ireplace(
+            ['<' . $this->tempTagName . '-special>', '</' . $this->tempTagName . '-special>'],
+            ['<!', '>'],
+            $result
+        );
+
+        $result = str_ireplace(
+            array_values($this->specialTagMap),
+            array_keys($this->specialTagMap),
+            $result
+        );
 
         return $result;
     }
@@ -749,6 +902,8 @@ class FafteParser extends BaseObject
         return trim(str_replace('&nbsp;', mb_chr(0xA0, 'UTF-8'), $string), " \t\n\r\0\x0B" . mb_chr(0xC2, 'UTF-8') . mb_chr(0xA0, 'UTF-8'));
     }
 
+    protected array $specialTagMap = [];
+
     /**
      * @param string $string
      *
@@ -757,9 +912,12 @@ class FafteParser extends BaseObject
     protected function getSafeHtml(string $string): string
     {
         $string = preg_replace('/<!(?<tag>[^\->]+)>/mi', '<'.$this->tempTagName.'-special>$1</'.$this->tempTagName.'-special>', $string);
-        $string = preg_replace('/(?<tag><\/?)(?<name>head|body|html)/mi', '$1'.$this->tempTagName.'-$2', $string);
 
-        return $string;
+        return str_ireplace(
+            array_keys($this->specialTagMap),
+            array_values($this->specialTagMap),
+            $string
+        );
     }
 
     /**
@@ -796,7 +954,12 @@ class FafteParser extends BaseObject
                 if ($elementSetting->element !== null) {
                     $childElementTagName = $this->parserElementsByClassName[$elementSetting->element]->tagName();
 
-                    $unfilteredChildDomNodes = $xPath->query('//' . $childElementTagName);
+                    $childElementTagNames = array_merge(
+                        [$childElementTagName],
+                        $this->parserElementsByClassName[$elementSetting->element]->tagNameAliases()
+                    );
+
+                    $unfilteredChildDomNodes = $xPath->query('//' . implode('|//', $childElementTagNames));
                     $childDomNodes = [];
 
                     /**
@@ -805,7 +968,16 @@ class FafteParser extends BaseObject
                     foreach ($unfilteredChildDomNodes as $unfilteredChildDomNode) {
                         $childNodePath = $unfilteredChildDomNode->getNodePath();
 
-                        if (preg_replace('/^(.*)(\[[\d]*])$/m', '$1', $childNodePath) === $nodePath . '/' . $childElementTagName) {
+                        $childNodePathParts = explode('/', $childNodePath);
+                        $currentChildNode = array_pop($childNodePathParts);
+
+                        $bracketPosition = mb_strpos($currentChildNode, '[');
+
+                        if ($bracketPosition !== false) {
+                            $currentChildNode = mb_substr($currentChildNode, 0, $bracketPosition);
+                        }
+
+                        if (implode('/', $childNodePathParts) === $nodePath && in_array($currentChildNode, $childElementTagNames, true)) {
                             $childDomNodes[] = $unfilteredChildDomNode;
                         }
                     }
@@ -849,6 +1021,8 @@ class FafteParser extends BaseObject
                             $data[$elementSetting->name][] = $attributeContent;
                         }
                     }
+
+                    unset($attributeContent);
                 }
                 //endregion attribute
 
@@ -866,12 +1040,12 @@ class FafteParser extends BaseObject
         if ($content === null && !$hasChildren) {
             $content = $domNode->innerHTML;
 
-            if ($parserElement->parseContent) {
+            if ($parserElement->getParseContent()) {
                 if ($contentElementSetting !== null && $contentElementSetting->element !== null) {
                     $contentElementSettingName = $this->parserElementsByClassName[$contentElementSetting->element]->tagName();
                     $content = $this->parseElements('<' . $contentElementSettingName . '>' . $content . '</' . $contentElementSettingName . '>', $currentTagName, $contentElementSetting->rawData);
                 } else {
-                    $content = $this->parseElements($content, $currentTagName);
+                    $content = $this->parseElements($content, $currentTagName, $parserElement->getContentAsRawData());
                 }
             }
 
@@ -881,25 +1055,34 @@ class FafteParser extends BaseObject
             }
         }
 
+        //Set data to make it possible to access other properties in validation
+        $parserElement->setData($data);
+
         if ($elementSettings !== null) {
             foreach ($elementSettings as $elementSetting) {
                 if ($elementSetting->defaultValue !== null && ($data[$elementSetting->name] === null || $data[$elementSetting->name] === [] || $data[$elementSetting->name] === '')) {
                     $data[$elementSetting->name] = $elementSetting->defaultValue;
                 }
 
-                $rules = new Rules($elementSetting->rules);
-                $result = $rules->validate($data[$elementSetting->name]);
+                try {
+                    $rules = new Rules($elementSetting->rules);
+                    $result = $rules->validate($data[$elementSetting->name]);
 
-                if ($result->isValid() === false) {
-                    throw new RuntimeException('Validation error of ElementSetting "'  . $elementSetting->name . '" of element "' . $currentTagName . '".' . PHP_EOL . 'Line: ' . $domNode->getLineNo() . PHP_EOL . 'Code: ' . $domNode->outerHTML . PHP_EOL . 'Error: ' . print_r($result->getErrors(), true));
+                    if ($result->isValid() === false) {
+                        throw new RuntimeException('Validation error of ElementSetting "'  . $elementSetting->name . '" of element "' . $currentTagName . '".' . PHP_EOL . 'Line: ' . $domNode->getLineNo() . PHP_EOL . 'Code: ' . $domNode->outerHTML . PHP_EOL . 'Error: ' . print_r($result->getErrors(), true));
+                    }
+                } catch (Exception $e) {
+                    throw new RuntimeException('Cannot validate ElementSetting "'  . $elementSetting->name . '" of element "' . $currentTagName . '".' . PHP_EOL . 'Line: ' . $domNode->getLineNo() . PHP_EOL . 'Code: ' . $domNode->outerHTML . PHP_EOL . 'Error: ' . $e->getMessage());
                 }
             }
         }
 
-        $parserElement->content = $content;
-        $parserElement->attributes = $attributes;
-        $parserElement->elements = $elements;
-        $parserElement->data = $data;
+        //Set data to update default values etc.
+        $parserElement->setData($data)
+            ->setContent($content)
+            ->setAttributes($attributes)
+            ->setElements($elements)
+            ->setDomNode($domNode);
 
         $this->debugEnd($debugId);
     }
@@ -1034,7 +1217,8 @@ class FafteParser extends BaseObject
                 }
             }
 
-            return $workData->$key;
+            $value = $workData->$key;
+            return $value;
         }
 
         if (isset($workData[$key])) {
@@ -1086,10 +1270,12 @@ class FafteParser extends BaseObject
             return $value;
         }
 
-        $value = $this->fullTrim($value);
+        if (is_string($value)) {
+            $value = $this->fullTrim($value);
+        }
 
         if (is_numeric($value)) {
-            if (mb_strpos($value, '.') === false) {
+            if (is_int($value) || mb_strpos($value, '.') === false) {
                 $value = (int)$value;
                 return $value;
             }
@@ -1114,7 +1300,13 @@ class FafteParser extends BaseObject
             return $value;
         }
 
-        if (preg_match('/^([^ \n]+)$/i', $value)) {
+        if (mb_strpos($value, '.') === 0) {
+            /** @noinspection PhpUnnecessaryLocalVariableInspection */
+            $dataValue = &$this->getAttributeData(mb_substr($value, 1));
+            return $dataValue;
+        }
+
+        if (mb_strpos($value, ' ') === false && mb_strpos($value, PHP_EOL) === false) {
             $dataValue = &$this->getAttributeData($value);
 
             if ($dataValue !== null) {

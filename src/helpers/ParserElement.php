@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace fafte\helpers;
 
 use fafte\FafteParser;
+use IvoPetkov\HTML5DOMElement;
 
 /**
  * Class ParserElement
@@ -18,6 +19,50 @@ abstract class ParserElement extends BaseObject
     protected FafteParser $parser;
 
     /**
+     * @var bool
+     */
+    protected bool $prefixParserName = true;
+
+    /**
+     * @var bool specify if content should be parsed. If set to false content will return raw html.
+     */
+    protected bool $parseContent = true;
+
+    /**
+     * @var bool specify if parsed content should return raw data.
+     */
+    protected bool $contentAsRawData = false;
+
+    /**
+     * @var array Parsed data of element
+     */
+    protected array $data = [];
+
+    /**
+     * @var array Raw attributes of element
+     */
+    protected array $attributes = [];
+
+    /**
+     * @var array Raw child elements of element
+     */
+    protected array $elements = [];
+
+    /**
+     * @var mixed Content of element
+     */
+    protected $content;
+
+    //region getter and setter
+    /**
+     * @return FafteParser
+     */
+    public function getParser(): FafteParser
+    {
+        return $this->parser;
+    }
+
+    /**
      * @param FafteParser $parser
      *
      * @return $this
@@ -28,35 +73,139 @@ abstract class ParserElement extends BaseObject
         return $this;
     }
 
-    /**
-     * @var bool
-     */
-    public bool $prefixParserName = true;
+    protected HTML5DOMElement $domNode;
 
     /**
-     * @var bool specify if content should be parsed. If set to false content will return raw data.
+     * @return HTML5DOMElement
      */
-    public bool $parseContent = true;
+    public function getDomNode(): HTML5DOMElement
+    {
+        return $this->domNode;
+    }
 
     /**
-     * @var array Parsed data of element
+     * @param HTML5DOMElement $domNode
+     *
+     * @return $this
      */
-    public array $data = [];
+    public function setDomNode(HTML5DOMElement $domNode): self
+    {
+        $this->domNode = $domNode;
+        return $this;
+    }
 
     /**
-     * @var array Raw attributes of element
+     * @return bool
      */
-    public array $attributes = [];
+    public function isPrefixParserName(): bool
+    {
+        return $this->prefixParserName;
+    }
 
     /**
-     * @var array Raw child elements of element
+     * @param bool $prefixParserName
+     *
+     * @return $this
      */
-    public array $elements = [];
+    public function setPrefixParserName(bool $prefixParserName): self
+    {
+        $this->prefixParserName = $prefixParserName;
+        return $this;
+    }
 
     /**
-     * @var mixed Content of element
+     * @return bool
      */
-    public $content;
+    public function getParseContent(): bool
+    {
+        return $this->parseContent;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getContentAsRawData(): bool
+    {
+        return $this->contentAsRawData;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return $this
+     */
+    public function setData(array $data): self
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @param array $attributes
+     *
+     * @return $this
+     */
+    public function setAttributes(array $attributes): self
+    {
+        $this->attributes = $attributes;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getElements(): array
+    {
+        return $this->elements;
+    }
+
+    /**
+     * @param array $elements
+     *
+     * @return $this
+     */
+    public function setElements(array $elements): self
+    {
+        $this->elements = $elements;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContent()
+    {
+        return $this->content;
+    }
+
+    /**
+     * @param $content
+     *
+     * @return $this
+     */
+    public function setContent($content)
+    {
+        $this->content = $content;
+        return $this;
+    }
+    //endregion getter and setter
+
 
     /**
      * @return ElementSetting[]|null

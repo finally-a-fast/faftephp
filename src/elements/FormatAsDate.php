@@ -11,7 +11,8 @@ use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class FormatAsDate
- * @package fafcms\parser\elements
+ *
+ * @package fafte\elements
  */
 class FormatAsDate extends ParserElement
 {
@@ -56,6 +57,7 @@ class FormatAsDate extends ParserElement
                 'label' => 'String',
                 'element' => FormatAsDateString::class,
                 'content' => true,
+                'defaultValue' => 'NOW',
                 'rules' => [
                     new Required(),
                 ]

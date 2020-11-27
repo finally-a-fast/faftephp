@@ -29,6 +29,14 @@ class TimeTag extends ParserElement
     /**
      * {@inheritdoc}
      */
+    public function aliases(): array
+    {
+        return ['html-time'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function description(): string
     {
         return 'Creates an html time tag.';

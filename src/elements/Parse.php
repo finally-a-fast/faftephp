@@ -68,6 +68,6 @@ class Parse extends ParserElement
 
         $fafte = $this->parser;
 
-        return $fafte->parse($this->data['string']);
+        return $fafte->parseElements($this->data['string'], $this->tagName());
     }
 }
