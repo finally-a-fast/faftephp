@@ -68,7 +68,7 @@ class VarDump extends ParserElement
     public function run()
     {
         ob_start();
-        ob_implicit_flush(PHP_VERSION >= 8 ? false : 0);
+        PHP_VERSION_ID >= 80000 ? ob_implicit_flush(false) : ob_implicit_flush(0);
         var_dump($this->data['params']);
 
         return ob_get_clean();
