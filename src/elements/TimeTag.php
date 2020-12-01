@@ -99,11 +99,21 @@ class TimeTag extends ParserElement
                 //TODO
                 //'element' => TimeTagInputFormat::class,
             ]),
+            new ElementSetting([
+                'name' => 'attributes',
+                'label' => 'Attributes',
+                'element' => TagAttribute::class,
+                'rawData' => true,
+                'attributeNameAsKey' => true,
+                'multiple' => true,
+                'multipleAttributeExpression' => '/^(.*)?$/i',
+            ]),
         ];
     }
 
     /**
      * {@inheritdoc}
+     * @throws \JsonException
      */
     public function run()
     {
@@ -122,6 +132,20 @@ class TimeTag extends ParserElement
             $humanTimeZone = new \DateTimeZone($this->data['human-time-zone']);
         }
 
-        return '<time datetime="' . $this->parser->formatDateTime($this->data['datetime'], $this->data['machine-format'], $machineTimeZone) . '">' . $this->parser->formatDateTime($this->data['datetime'], $this->data['human-format'], $humanTimeZone) . '</time>';
+        $options = $this->data['attributes'];
+
+        unset(
+            $options['datetime'],
+            $options['machine-format'],
+            $options['human-format'],
+            $options['input-format'],
+            $options['machine-time-zone'],
+            $options['human-time-zone'],
+            $options['input-time-zone']
+        );
+
+        $options['datetime'] = $this->parser->formatDateTime($this->data['datetime'], $this->data['machine-format'], $machineTimeZone);
+
+        return $this->parser->htmlTag('time', $this->parser->formatDateTime($this->data['datetime'], $this->data['human-format'], $humanTimeZone), $options);
     }
 }

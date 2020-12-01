@@ -20,6 +20,16 @@ class DataHelper extends BaseObject
     public $name;
 
     /**
+     * @var mixed
+     */
+    public $value;
+
+    /**
+     * @var bool
+     */
+    public bool $keepEmpty;
+
+    /**
      * @param string|int|null $name
      *
      * @return $this
@@ -42,9 +52,15 @@ class DataHelper extends BaseObject
     }
 
     /**
-     * @var mixed
+     * @param bool $keepEmpty
+     *
+     * @return $this
      */
-    public $value;
+    public function setKeepEmpty(bool $keepEmpty): self
+    {
+        $this->keepEmpty = $keepEmpty;
+        return $this;
+    }
 
     /**
      * @param string      $name

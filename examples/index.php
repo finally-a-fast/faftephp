@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 include('../vendor/autoload.php');
 
 use fafte\FafteParser;
@@ -74,6 +77,18 @@ $demos = scandir($demoDir);
                     editor.setOption('showInvisibles', true)
                     editor.session.setUseWrapMode(true)
                 })
+
+                var frame = $('#frame-content').get(0)
+
+                if (frame.contentDocument) {
+                    frame.document = frame.contentDocument;
+                }
+
+                if (frame.document !== null) {
+                    frame.document.open();
+                    frame.document.writeln('<style>*{font: 12px/normal \'Monaco\', \'Menlo\', \'Ubuntu Mono\', \'Consolas\', \'source-code-pro\', monospace;color:#ffffff;</style>' + $('#raw-content').text());
+                    frame.document.close();
+                }
             })
         </script>
         <style>
@@ -98,6 +113,13 @@ $demos = scandir($demoDir);
 
             .ui.inverted.menu.fixed {
                 background-color: #151a22;
+            }
+
+            #frame-content {
+                background-color: #2e3440;
+                border: 1px solid #151a22;
+                width: 100%;
+                height: 25vh;
             }
 
             .full.height {
@@ -169,9 +191,46 @@ $demos = scandir($demoDir);
                             <h2 class="ui inverted header">Raw result</h2>
                             <pre class="editor readonly"><?= htmlentities($paredContent) ?></pre>
                             <h2 class="ui inverted header">Result</h2>
-                            <div class="ui inverted segment"><?= $paredContent ?></div>
+                            <textarea id="raw-content" style="display: none"><?= $paredContent ?></textarea>
+                            <iframe id="frame-content" src="#"></iframe>
                             <h2 class="ui inverted header">Log</h2>
                             <pre class="editor readonly"><?= file_get_contents($logFile) ?></pre>
+                            <h2 class="ui inverted header">Executed code</h2>
+                            <?php
+                                $code = var_export($code, true);
+                                $data = var_export(require('sample-data.php'), true);
+
+                                $executedCode = <<<PHP
+                                <?php
+
+                                use fafte\FafteParser;
+                                use Yiisoft\Log\Logger;
+                                use Yiisoft\Log\Target\File\FileTarget;
+                                use Yiisoft\Cache\Cache;
+                                use Yiisoft\Cache\Apcu\ApcuCache;
+
+                                \$logger = new Logger([
+                                    new FileTarget('$logFile')
+                                ]);
+
+                                \$cache = new Cache(new ApcuCache());
+
+                                \$fafte = new FafteParser([
+                                    'logger'   => \$logger,                      // any PSR-16 cache @see https://www.php-fig.org/psr/psr-16/
+                                    'cache'    => \$cache,                       // any PSR-3 logger @see https://www.php-fig.org/psr/psr-3/
+                                    'mode'     => FafteParser::MODE_DEV,         // you should remove this line to use production mode
+                                    'language' => 'de_DE',                       // any ICU locale @see https://icu4c-demos.unicode.org/icu-bin/locexp
+                                    //'data'     => ['string' => 'Test string']  // you can pass any data to the parser
+                                ]);
+
+                                // you can also pass any option with the corresponding setter function
+                                \$fafte->setData($data);
+
+                                echo \$fafte->parse($code);
+                                PHP;
+
+                                echo '<pre class="editor readonly">' . htmlentities($executedCode) . '</pre>';
+                            ?>
                         </form>
                     </div>
                 </div>

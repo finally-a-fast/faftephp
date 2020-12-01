@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 $stdClass = new stdClass();
 $stdClass->a = 'class item a';
 $stdClass->b = 'class item b';
@@ -30,5 +32,8 @@ return [
     'array' => $array,
     'stdclass' => $stdClass,
     'deep-structure' => $deepStructure,
-    'parsable-string' => '<fafte-strtoupper>\'parsed string\'</fafte-strtoupper>'
+    'parsable-string' => '<fafte-strtoupper>\'parsed string\'</fafte-strtoupper>',
+    'array-name' => '.array',
+    'item-name' => 'test',
+    'url' => 'https://www.finally-a-fast.com/',
 ];

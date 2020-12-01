@@ -11,6 +11,7 @@ use DateTimeZone;
 use fafte\elements\Trim;
 use fafte\elements\TrimString;
 use fafte\elements\TrimCharlist;
+use fafte\helpers\DataHelper;
 use IntlCalendar;
 use IntlDateFormatter;
 use IntlTimeZone;
@@ -67,6 +68,10 @@ use fafte\elements\{Base64Decode,
     HtmlspecialcharsDecodeString,
     HtmlspecialcharsString,
     JsonEncode,
+    Loop,
+    LoopAs,
+    LoopBody,
+    LoopEach,
     Nl2Br,
     Nl2BrString,
     Param,
@@ -86,6 +91,13 @@ use fafte\elements\{Base64Decode,
     StrToLowerString,
     StrToUpper,
     StrToUpperString,
+    Tag,
+    TagAttribute,
+    TagAttributeEmpty,
+    TagAttributeName,
+    TagAttributeValue,
+    TagBody,
+    TagName,
     TimeTag,
     UcWords,
     UcWordsDelimiters,
@@ -205,6 +217,17 @@ class FafteParser extends BaseObject
         ConditionalStatementCondition::class,
         ConditionalStatementConditionAnd::class,
         ConditionalStatementConditionOr::class,
+        Loop::class,
+        LoopBody::class,
+        LoopEach::class,
+        LoopAs::class,
+        Tag::class,
+        TagName::class,
+        TagBody::class,
+        TagAttribute::class,
+        TagAttributeName::class,
+        TagAttributeValue::class,
+        TagAttributeEmpty::class,
     ];
 
     public ?LoggerInterface $logger = null;
@@ -293,6 +316,11 @@ class FafteParser extends BaseObject
      * @var array
      */
     protected array $allowedChildElements = [];
+
+    /**
+     * @var HTML5DOMDocument
+     */
+    protected HTML5DOMDocument $htmlTagDom;
     //endregion properties
 
     //region getter and setter
@@ -540,6 +568,8 @@ class FafteParser extends BaseObject
             '</html' => '</' . $this->tempTagName . '-html',
         ];
 
+        $this->htmlTagDom = new HTML5DOMDocument();
+
         $this->debugEnd($debugId);
     }
     //endregion init
@@ -628,6 +658,7 @@ class FafteParser extends BaseObject
     }
     //endregion child elements
 
+    //region formatter and helper
     /**
      * @param int                            $type
      * @param DateTime|string               $dateTime
@@ -733,6 +764,66 @@ class FafteParser extends BaseObject
 
         return $numberFormatter->format($number);
     }
+
+    /**
+     * @param string $name
+     * @param string $content
+     * @param array  $options
+     *
+     * @return string
+     * @throws \JsonException
+     */
+    public function htmlTag(string $name, string $content = '', array $options = []): string
+    {
+        /**
+         * @var $element HTML5DOMElement
+         */
+        $element = $this->htmlTagDom->createElement($name);
+        $element->innerHTML = $content;
+
+        foreach ($options as $attribute => $value) {
+            if ($value instanceof DataHelper) {
+                if (!$value->keepEmpty && $value->value === '') {
+                    continue;
+                }
+
+                $attribute = $value->name;
+                $value = $value->value;
+            }
+
+            if (is_array($value) || is_object($value)) {
+                $value = json_encode(
+                    $value,
+                    JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_THROW_ON_ERROR,
+                    512
+                );
+            }
+
+            if ($value === true) {
+                $value = 'true';
+            } elseif ($value === false) {
+                $value = 'false';
+            }
+
+            $element->setAttribute($attribute, (string)$value);
+        }
+
+        return $element->outerHTML;
+    }
+
+    /**
+     * @param string $name
+     * @param string $content
+     * @param array  $options
+     *
+     * @return string
+     * @throws \JsonException
+     */
+    public function getSafeHtmlTag(string $name, string $content = '', array $options = []): string
+    {
+        return $this->getSafeHtml($this->htmlTag($name, $content, $options));
+    }
+    //endregion formatter and helper
 
     /**
      * @param $string
@@ -1306,13 +1397,13 @@ class FafteParser extends BaseObject
             return $dataValue;
         }
 
-        if (mb_strpos($value, ' ') === false && mb_strpos($value, PHP_EOL) === false) {
+        /*if (mb_strpos($value, ' ') === false && mb_strpos($value, PHP_EOL) === false) {
             $dataValue = &$this->getAttributeData($value);
 
             if ($dataValue !== null) {
                 return $dataValue;
             }
-        }
+        }*/
 
         return $value;
     }
@@ -1338,8 +1429,10 @@ class FafteParser extends BaseObject
             }
 
             $count = count($this->data['temp-data-storage']);
-            $tempName = 'temp-data-storage.' . $count;
+            $tempName = 'temp-data-storage.' . $count;//.?
             $this->setAttributeData($tempName, $value);
+            /** @noinspection UselessUnsetInspection */
+            unset($value);
             $value = $tempName;
         }
 

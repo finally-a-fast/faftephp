@@ -1,0 +1,21 @@
+<fafte-loop each=".array" as="item">
+    <fafte-get i=".item" /><br>
+</fafte-loop>
+<br>
+<br>
+<fafte-loop>
+    <fafte-loop-each>
+        <fafte-get i=".array-name" />
+    </fafte-loop-each>
+    <fafte-loop-as>
+        <fafte-get i=".item-name" />
+    </fafte-loop-as>
+    <fafte-loop-body>
+        Index: <fafte-get i=".test.$$index" />
+        Numeric Index: <fafte-get i=".test.$$numericIndex" /><br><br>
+    </fafte-loop-body>
+</fafte-loop>
+
+
+<fafcms-loop each="contactsubgroup.contactContactsubgroups" as="'contactContactsubgroup'" wrap-step="3" wrap-tag="div" wrap-tag-class="row same-height">
+</fafcms-loop>
