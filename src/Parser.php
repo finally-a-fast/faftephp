@@ -118,7 +118,7 @@ use Exception;
 use RuntimeException;
 use Yiisoft\Validator\Rules;
 
-class FafteParser extends BaseObject
+class Parser extends BaseObject
 {
     public const ROOT = 'root';
 
@@ -355,7 +355,7 @@ class FafteParser extends BaseObject
     /**
      * @param array|string[] $elements
      *
-     * @return FafteParser
+     * @return Parser
      */
     public function setElements($elements)
     {
@@ -367,7 +367,7 @@ class FafteParser extends BaseObject
     /**
      * @param array|string[] $elements
      *
-     * @return FafteParser
+     * @return Parser
      */
     public function addElements($elements)
     {
@@ -499,7 +499,7 @@ class FafteParser extends BaseObject
     /**
      * @param bool $returnRawData
      *
-     * @return FafteParser
+     * @return Parser
      */
     public function setReturnRawData(bool $returnRawData): self
     {

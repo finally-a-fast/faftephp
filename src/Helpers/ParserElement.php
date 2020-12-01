@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Helpers;
 
-use Faf\TemplateEngine\FafteParser;
+use Faf\TemplateEngine\Parser;
 use IvoPetkov\HTML5DOMElement;
 
 /**
@@ -14,9 +14,9 @@ use IvoPetkov\HTML5DOMElement;
 abstract class ParserElement extends BaseObject
 {
     /**
-     * @var FafteParser
+     * @var Parser
      */
-    protected FafteParser $parser;
+    protected Parser $parser;
 
     /**
      * @var bool
@@ -55,19 +55,19 @@ abstract class ParserElement extends BaseObject
 
     //region getter and setter
     /**
-     * @return FafteParser
+     * @return Parser
      */
-    public function getParser(): FafteParser
+    public function getParser(): Parser
     {
         return $this->parser;
     }
 
     /**
-     * @param FafteParser $parser
+     * @param Parser $parser
      *
      * @return $this
      */
-    public function setParser(FafteParser $parser): self
+    public function setParser(Parser $parser): self
     {
         $this->parser = $parser;
         return $this;

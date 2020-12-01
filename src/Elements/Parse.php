@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
-use Faf\TemplateEngine\FafteParser;
+use Faf\TemplateEngine\Parser;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
 use Yiisoft\Validator\Rule\Boolean;
@@ -57,10 +57,10 @@ class Parse extends ParserElement
         /**
          * TODO add option to create new parser and pass data language etc. options
          *
-         *  $fafte = new FafteParser([
+         *  $fafte = new Parser([
          *      'logger' => $logger,
          *      'cache' => $cache,
-         *      'mode' => FafteParser::MODE_DEV
+         *      'mode' => Parser::MODE_DEV
          *  ]);
          *
          *  $fafte->setData($data);

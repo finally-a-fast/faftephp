@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Helpers;
 
-use Faf\TemplateEngine\FafteParser;
+use Faf\TemplateEngine\Parser;
 use Exception;
 
 /**
@@ -65,9 +65,9 @@ class DataHelper extends BaseObject
     /**
      * @param string      $name
      * @param             $value
-     * @param FafteParser $parser
+     * @param Parser $parser
      */
-    private static function setData(string $name, $value, FafteParser $parser): void
+    private static function setData(string $name, $value, Parser $parser): void
     {
         $parser->setAttributeData($name, $value);
     }
@@ -75,12 +75,12 @@ class DataHelper extends BaseObject
     /**
      * @param array       $rawParams
      * @param bool        $setAttributeData
-     * @param FafteParser $parser
+     * @param Parser $parser
      *
      * @return array
      * @throws Exception
      */
-    public static function formatParams(array $rawParams, bool $setAttributeData, FafteParser $parser): array
+    public static function formatParams(array $rawParams, bool $setAttributeData, Parser $parser): array
     {
         $params = [];
 
@@ -110,11 +110,11 @@ class DataHelper extends BaseObject
 
     /**
      * @param mixed       $value
-     * @param FafteParser $parser
+     * @param Parser $parser
      *
      * @return mixed
      */
-    public static function formatValue($value, FafteParser $parser)
+    public static function formatValue($value, Parser $parser)
     {
         return $parser->getRawValue($value);
     }

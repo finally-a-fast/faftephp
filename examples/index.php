@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 include('../vendor/autoload.php');
 
-use Faf\TemplateEngine\FafteParser;
+use Faf\TemplateEngine\Parser;
 use Yiisoft\Log\Logger;
 use Yiisoft\Log\Target\File\FileTarget;
 use Yiisoft\Cache\Cache;
@@ -19,10 +19,10 @@ $logger = new Logger([
 
 $cache = new Cache(new ApcuCache());
 
-$fafte = new FafteParser([
+$fafte = new Parser([
     'logger' => $logger,
     'cache' => $cache,
-    'mode' => FafteParser::MODE_DEV,
+    'mode' => Parser::MODE_DEV,
     'language' => 'de_DE'
 ]);
 
@@ -203,7 +203,7 @@ $demos = scandir($demoDir);
                                 $executedCode = <<<PHP
                                 <?php
 
-                                use Faf\TemplateEngine\FafteParser;
+                                use Faf\TemplateEngine\Parser;
                                 use Yiisoft\Log\Logger;
                                 use Yiisoft\Log\Target\File\FileTarget;
                                 use Yiisoft\Cache\Cache;
@@ -215,10 +215,10 @@ $demos = scandir($demoDir);
 
                                 \$cache = new Cache(new ApcuCache());
 
-                                \$fafte = new FafteParser([
+                                \$fafte = new Parser([
                                     'logger'   => \$logger,                      // any PSR-16 cache @see https://www.php-fig.org/psr/psr-16/
                                     'cache'    => \$cache,                       // any PSR-3 logger @see https://www.php-fig.org/psr/psr-3/
-                                    'mode'     => FafteParser::MODE_DEV,         // you should remove this line to use production mode
+                                    'mode'     => Parser::MODE_DEV,         // you should remove this line to use production mode
                                     'language' => 'de_DE',                       // any ICU locale @see https://icu4c-demos.unicode.org/icu-bin/locexp
                                     //'data'     => ['string' => 'Test string']  // you can pass any data to the parser
                                 ]);
