@@ -6,9 +6,7 @@ $stdClass = new stdClass();
 $stdClass->a = 'class item a';
 $stdClass->b = 'class item b';
 
-$numericArray = [
-    'a', 'b', 'c', 'd'
-];
+$numericArray = range('a', 'z');
 
 $array = [
     'a' => 'aA', 'b' => 'bB', 'c' => 'cC', 'd' => 'dD'

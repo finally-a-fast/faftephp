@@ -769,11 +769,12 @@ class FafteParser extends BaseObject
      * @param string $name
      * @param string $content
      * @param array  $options
+     * @param string $attributePrefix
      *
      * @return string
      * @throws \JsonException
      */
-    public function htmlTag(string $name, string $content = '', array $options = []): string
+    public function htmlTag(string $name, string $content = '', array $options = [], string $attributePrefix = ''): string
     {
         /**
          * @var $element HTML5DOMElement
@@ -789,6 +790,14 @@ class FafteParser extends BaseObject
 
                 $attribute = $value->name;
                 $value = $value->value;
+            } else {
+                if ($value === '') {
+                    continue;
+                }
+
+                if ($attributePrefix !== '') {
+                    $attribute = (mb_strpos($attribute, $attributePrefix) === 0 ? mb_substr($attribute, mb_strlen($attributePrefix)) : $attribute);
+                }
             }
 
             if (is_array($value) || is_object($value)) {
@@ -810,19 +819,6 @@ class FafteParser extends BaseObject
 
         return $element->outerHTML;
     }
-
-    /**
-     * @param string $name
-     * @param string $content
-     * @param array  $options
-     *
-     * @return string
-     * @throws \JsonException
-     */
-    public function getSafeHtmlTag(string $name, string $content = '', array $options = []): string
-    {
-        return $this->getSafeHtml($this->htmlTag($name, $content, $options));
-    }
     //endregion formatter and helper
 
     /**
@@ -836,6 +832,20 @@ class FafteParser extends BaseObject
         $debugId = $this->debugStart('Parse');
 
         $result = $this->parseElements($string, self::ROOT, $this->returnRawData);
+
+        if (!$this->returnRawData) {
+            $result = str_ireplace(
+                ['<' . $this->tempTagName . '-special>', '</' . $this->tempTagName . '-special>'],
+                ['<!', '>'],
+                $result
+            );
+
+            $result = str_ireplace(
+                array_values($this->specialTagMap),
+                array_keys($this->specialTagMap),
+                $result
+            );
+        }
 
         $this->debugEnd($debugId);
 
@@ -950,7 +960,8 @@ class FafteParser extends BaseObject
             $this->currentDeep = $oldDeep;
 
             if ($getParsedContent) {
-                $result = $this->getParsedContent($xPath);
+                $node = $xPath->query('//' . $this->tempTagName);
+                $result = $node[0]->innerHTML;
             }
         }
 
@@ -959,26 +970,6 @@ class FafteParser extends BaseObject
         $this->parentTagName = $parentTagName;
 
         $this->debugEnd($parseElementDebugId);
-
-        return $result;
-    }
-
-    protected function getParsedContent($xPath): string
-    {
-        $node = $xPath->query('//' . $this->tempTagName);
-        $result = $node[0]->innerHTML;
-
-        $result = str_ireplace(
-            ['<' . $this->tempTagName . '-special>', '</' . $this->tempTagName . '-special>'],
-            ['<!', '>'],
-            $result
-        );
-
-        $result = str_ireplace(
-            array_values($this->specialTagMap),
-            array_keys($this->specialTagMap),
-            $result
-        );
 
         return $result;
     }

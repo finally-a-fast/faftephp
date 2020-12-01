@@ -16,11 +16,6 @@ class TagAttributeValue extends ParserElement
     /**
      * {@inheritdoc}
      */
-    public bool $parseContent = false;
-
-    /**
-     * {@inheritdoc}
-     */
     public function name(): string
     {
         return 'tag-attribute-value';

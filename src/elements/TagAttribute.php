@@ -71,7 +71,7 @@ class TagAttribute extends ParserElement
     {
         return new DataHelper([
             'name' => $this->data['name'],
-            'value' => $this->parser->getRawValue($this->parser->parseElements((string)$this->data['value'], $this->tagName(), true)),
+            'value' => $this->data['value'],
             'keepEmpty' => $this->data['empty']
         ]);
     }
