@@ -19,9 +19,9 @@ use IvoPetkov\HTML5DOMElement;
 use IvoPetkov\HTML5DOMDocument;
 use DOMXPath;
 
-use Faf\TemplateEngine\Elements\{
-    Base64Decode,
+use Faf\TemplateEngine\Elements\{Base64Decode,
     Base64Encode,
+    Calc,
     Call,
     CallFunction,
     ConditionalStatement,
@@ -229,6 +229,7 @@ class Parser extends BaseObject
         TagAttributeName::class,
         TagAttributeValue::class,
         TagAttributeEmpty::class,
+        Calc::class
     ];
 
     public ?LoggerInterface $logger = null;
