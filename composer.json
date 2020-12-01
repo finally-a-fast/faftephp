@@ -3,7 +3,8 @@
     "keywords": [
         "faftephp"
     ],
-    "type": "yii2-extension",
+    "type": "library",
+    "description": "Html parser.",
     "license": "MIT",
     "homepage": "https://www.finally-a-fast.com/",
     "support": {
