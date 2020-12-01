@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace fafte;
+namespace Faf\TemplateEngine;
 
 use Closure;
 
 use DateTime;
 use DateTimeZone;
-use fafte\elements\Trim;
-use fafte\elements\TrimString;
-use fafte\elements\TrimCharlist;
-use fafte\helpers\DataHelper;
+use Faf\TemplateEngine\Elements\Trim;
+use Faf\TemplateEngine\Elements\TrimString;
+use Faf\TemplateEngine\Elements\TrimCharlist;
+use Faf\TemplateEngine\Helpers\DataHelper;
 use IntlCalendar;
 use IntlDateFormatter;
 use IntlTimeZone;
@@ -19,7 +19,8 @@ use IvoPetkov\HTML5DOMElement;
 use IvoPetkov\HTML5DOMDocument;
 use DOMXPath;
 
-use fafte\elements\{Base64Decode,
+use Faf\TemplateEngine\Elements\{
+    Base64Decode,
     Base64Encode,
     Call,
     CallFunction,
@@ -104,9 +105,9 @@ use fafte\elements\{Base64Decode,
     UcWordsString,
     VarDump};
 
-use fafte\helpers\BaseObject;
-use fafte\helpers\ElementSetting;
-use fafte\helpers\ParserElement;
+use Faf\TemplateEngine\Helpers\BaseObject;
+use Faf\TemplateEngine\Helpers\ElementSetting;
+use Faf\TemplateEngine\Helpers\ParserElement;
 use Locale;
 use NumberFormatter;
 use Psr\Log\LoggerInterface;

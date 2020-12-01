@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 include('../vendor/autoload.php');
 
-use fafte\FafteParser;
+use Faf\TemplateEngine\FafteParser;
 use Yiisoft\Log\Logger;
 use Yiisoft\Log\Target\File\FileTarget;
 use Yiisoft\Cache\Cache;
@@ -203,7 +203,7 @@ $demos = scandir($demoDir);
                                 $executedCode = <<<PHP
                                 <?php
 
-                                use fafte\FafteParser;
+                                use Faf\TemplateEngine\FafteParser;
                                 use Yiisoft\Log\Logger;
                                 use Yiisoft\Log\Target\File\FileTarget;
                                 use Yiisoft\Cache\Cache;
