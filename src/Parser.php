@@ -1315,7 +1315,10 @@ class Parser extends BaseObject
         if (($pos = strrpos($path, '.')) !== false) {
             $mainKey = substr($path, 0, $pos);
             $workData = static::getValue($data, $mainKey, $callLastClosure);
-            $data[$mainKey] = $workData;
+
+            // TODO Removed to fix bug in loops. Need to check if it has a negative effect.
+            // $data[$mainKey] = $workData;
+
             $path = substr($path, $pos + 1);
         }
 
@@ -1342,6 +1345,7 @@ class Parser extends BaseObject
             $value = $workData->$path;
             return $value;
         }
+
 
         if (isset($workData[$path])) {
             if (is_array($workData)) {
@@ -1430,14 +1434,6 @@ class Parser extends BaseObject
             $dataValue = &$this->getAttributeData(mb_substr($value, 1));
             return $dataValue;
         }
-
-        /*if (mb_strpos($value, ' ') === false && mb_strpos($value, PHP_EOL) === false) {
-            $dataValue = &$this->getAttributeData($value);
-
-            if ($dataValue !== null) {
-                return $dataValue;
-            }
-        }*/
 
         return $value;
     }
