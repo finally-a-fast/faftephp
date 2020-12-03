@@ -50,5 +50,6 @@ phpunit.xml
 # phpunit cache
 .phpunit.result.cache
 
-# sample files
+# log files
 /examples/parser.log
+infection.log
