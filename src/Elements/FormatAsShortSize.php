@@ -107,6 +107,6 @@ class FormatAsShortSize extends ParserElement
         $value = round($value, is_null($decimals) ? self::BYTE_PRECISION[$i] : $decimals);
         $suffix = $units[$i];
 
-        return $this->parser->formatNumber($value, NumberFormatter::DECIMAL) . ' ' . $suffix;
+        return ($this->parser->formatNumber($value, NumberFormatter::DECIMAL) ?: $value) . ' ' . $suffix;
     }
 }

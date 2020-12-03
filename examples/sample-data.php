@@ -6,6 +6,10 @@ $stdClass = new stdClass();
 $stdClass->a = 'class item a';
 $stdClass->b = 'class item b';
 
+$stdClassB = new stdClass();
+$stdClassB->a = 'B class item a';
+$stdClassB->b = 'B class item b';
+
 $numericArray = range('a', 'z');
 
 $array = [
@@ -34,4 +38,8 @@ return [
     'array-name' => '.array',
     'item-name' => 'test',
     'url' => 'https://www.finally-a-fast.com/',
+    'test-obj-array' => [
+        $stdClass,
+        $stdClassB
+    ],
 ];

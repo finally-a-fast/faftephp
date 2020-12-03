@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use Exception;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\DataHelper;
 use Faf\TemplateEngine\Helpers\ParserElement;

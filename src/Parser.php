@@ -232,8 +232,14 @@ class Parser extends BaseObject
         Calc::class
     ];
 
+    /**
+     * @var LoggerInterface|null
+     */
     public ?LoggerInterface $logger = null;
 
+    /**
+     * @var CacheInterface|null
+     */
     protected ?CacheInterface $cache = null;
 
     protected int $cacheTtl = 3600;
@@ -462,7 +468,23 @@ class Parser extends BaseObject
     {
         $this->logger = $logger;
 
+        if ($this->logger === null) {
+            $this->logger = new NullLogger();
+        }
+
         return $this;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger(): LoggerInterface
+    {
+        if ($this->logger === null) {
+            $this->logger = new NullLogger();
+        }
+
+        return $this->logger;
     }
 
     /**
@@ -597,7 +619,7 @@ class Parser extends BaseObject
                 $allowedTypes = $parserElement->allowedTypes();
 
                 if ($allowedTypes === null) {
-                    $allowedTypes = [null];
+                    $allowedTypes = [''];
                 }
 
                 foreach ($allowedTypes as $allowedType) {
@@ -608,12 +630,12 @@ class Parser extends BaseObject
                     $allowedParents = $parserElement->allowedParents();
 
                     if ($allowedParents === null) {
-                        $allowedParents = [null];
+                        $allowedParents = [''];
                     }
 
                     foreach ($allowedParents as $allowedParent) {
-                        if ($allowedParent === null) {
-                            $allowedChildElements[$allowedType][null][] = $currentTagName;
+                        if ($allowedParent === '') {
+                            $allowedChildElements[$allowedType][''][] = $currentTagName;
                         } elseif ($allowedParent === self::ROOT) {
                             $allowedChildElements[$allowedType][self::ROOT][] = $currentTagName;
                         } elseif (isset($this->parserElementsByClassName[$allowedParent])) {
@@ -651,8 +673,8 @@ class Parser extends BaseObject
     {
         $debugId = $this->debugStart('Get allowed child elements for ' . $tagName . ' of type ' . $type);
 
-        $allowedChildElementsByType = array_merge_recursive($this->allowedChildElements[null] ?? [], $this->allowedChildElements[$type] ?? []);
-        $allowedChildElementsByTag = array_merge_recursive($allowedChildElementsByType[null] ?? [], $allowedChildElementsByType[$tagName] ?? []);
+        $allowedChildElementsByType = array_merge_recursive($this->allowedChildElements[''] ?? [], $this->allowedChildElements[$type] ?? []);
+        $allowedChildElementsByTag = array_merge_recursive($allowedChildElementsByType[''] ?? [], $allowedChildElementsByType[$tagName] ?? []);
 
         $this->debugEnd($debugId);
 
@@ -663,7 +685,7 @@ class Parser extends BaseObject
     //region formatter and helper
     /**
      * @param int                            $type
-     * @param DateTime|string               $dateTime
+     * @param DateTime|string                $dateTime
      * @param string|int                     $format
      * @param IntlTimeZone|DateTimeZone|null $timeZone
      *
@@ -677,6 +699,7 @@ class Parser extends BaseObject
         $dateType = IntlDateFormatter::NONE;
         $timeType = IntlDateFormatter::NONE;
 
+        $intlFormat = '';
         $useFormatAsType = false;
 
         if ($format === null) {
@@ -686,19 +709,31 @@ class Parser extends BaseObject
         }
 
         if ($type === self::FORMAT_TYPE_DATE_TIME) {
+            /**
+             * @var int $format
+             */
             $dateType = $useFormatAsType ? $format : IntlDateFormatter::MEDIUM;
             $timeType = $useFormatAsType ? $format : IntlDateFormatter::MEDIUM;
         } elseif ($type === self::FORMAT_TYPE_DATE) {
+            /**
+             * @var int $format
+             */
             $dateType = $useFormatAsType ? $format : IntlDateFormatter::MEDIUM;
         } elseif ($type === self::FORMAT_TYPE_TIME) {
+            /**
+             * @var int $format
+             */
             $timeType = $useFormatAsType ? $format : IntlDateFormatter::MEDIUM;
         }
 
-        if ($useFormatAsType) {
-            $format = '';
+        if (!$useFormatAsType) {
+            /**
+             * @var string $format
+             */
+            $intlFormat = $format;
         }
 
-        $df = new IntlDateFormatter($this->currentLanguage, $dateType, $timeType, $timeZone, $calendar, $format);
+        $df = new IntlDateFormatter($this->currentLanguage, $dateType, $timeType, $timeZone, $calendar, $intlFormat);
         return $df->format($calendar);
     }
 
@@ -779,7 +814,7 @@ class Parser extends BaseObject
     public function htmlTag(string $name, string $content = '', array $options = [], string $attributePrefix = ''): string
     {
         /**
-         * @var $element HTML5DOMElement
+         * @var HTML5DOMElement $element
          */
         $element = $this->htmlTagDom->createElement($name);
         $element->innerHTML = $content;
@@ -826,7 +861,7 @@ class Parser extends BaseObject
     /**
      * @param $string
      *
-     * @return array|mixed|string|string[]|null
+     * @return array|object|string
      * @throws Exception
      */
     public function parse($string)
@@ -835,7 +870,7 @@ class Parser extends BaseObject
 
         $result = $this->parseElements($string, self::ROOT, $this->returnRawData);
 
-        if (!$this->returnRawData) {
+        if (!$this->returnRawData && is_string($result)) {
             $result = str_ireplace(
                 ['<' . $this->tempTagName . '-special>', '</' . $this->tempTagName . '-special>'],
                 ['<!', '>'],
@@ -859,7 +894,7 @@ class Parser extends BaseObject
      * @param string $currentTagName
      * @param bool   $rawData
      *
-     * @return array|string
+     * @return array|object|string
      * @throws Exception
      */
     public function parseElements(string $string, string $currentTagName, bool $rawData = false)
@@ -885,7 +920,7 @@ class Parser extends BaseObject
         $domNodes = [];
 
         /**
-         * @var $unfilteredDomNode HTML5DOMElement
+         * @var HTML5DOMElement $unfilteredDomNode
          */
         foreach ($unfilteredDomNodes as $unfilteredDomNode) {
             $nodePath = $unfilteredDomNode->getNodePath();
@@ -908,7 +943,7 @@ class Parser extends BaseObject
             $this->currentDeep++;
 
             if ($this->currentDeep > $this->maxDeep) {
-                $this->logger->emergency('Max deep of ' . $this->maxDeep . ' reached', [
+                $this->getLogger()->emergency('Max deep of ' . $this->maxDeep . ' reached', [
                     'time' => microtime(true),
                     'memory' => memory_get_usage()
                 ]);
@@ -953,7 +988,7 @@ class Parser extends BaseObject
                             $replacement = $this->getSafeHtml($replacement ?? '');
                         }
 
-                        $domNode->outerHTML = $replacement;
+                        $domNode->outerHTML = $replacement ?? '';
                         $getParsedContent = true;
                     }
                 }
@@ -962,6 +997,9 @@ class Parser extends BaseObject
             $this->currentDeep = $oldDeep;
 
             if ($getParsedContent) {
+                /**
+                 * @var HTML5DOMElement[] $node
+                 */
                 $node = $xPath->query('//' . $this->tempTagName);
                 $result = $node[0]->innerHTML;
             }
@@ -1030,7 +1068,7 @@ class Parser extends BaseObject
 
         $elementSettings = $parserElement->elementSettings();
 
-        if ($elementSettings !== null) {
+        if ($elementSettings !== []) {
             foreach ($elementSettings as $elementSetting) {
                 $data[$elementSetting->name] = [];
 
@@ -1047,7 +1085,7 @@ class Parser extends BaseObject
                     $childDomNodes = [];
 
                     /**
-                     * @var $unfilteredChildDomNode HTML5DOMElement
+                     * @var HTML5DOMElement $unfilteredChildDomNode
                      */
                     foreach ($unfilteredChildDomNodes as $unfilteredChildDomNode) {
                         $childNodePath = $unfilteredChildDomNode->getNodePath();
@@ -1142,7 +1180,7 @@ class Parser extends BaseObject
         //Set data to make it possible to access other properties in validation
         $parserElement->setData($data);
 
-        if ($elementSettings !== null) {
+        if ($elementSettings !== []) {
             foreach ($elementSettings as $elementSetting) {
                 if ($elementSetting->defaultValue !== null && ($data[$elementSetting->name] === null || $data[$elementSetting->name] === [] || $data[$elementSetting->name] === '')) {
                     $data[$elementSetting->name] = $elementSetting->defaultValue;
@@ -1225,7 +1263,7 @@ class Parser extends BaseObject
     {
         static::checkForClosure($data);
 
-        if ($path === null) {
+        if ($path === '') {
             $data = $value;
             return;
         }
@@ -1248,12 +1286,12 @@ class Parser extends BaseObject
 
     /**
      * @param        $data
-     * @param string $key
+     * @param string $path
      * @param bool   $callLastClosure
      *
      * @return Closure|mixed|null
      */
-    public static function &getValue(&$data, string $key, $callLastClosure = true)
+    public static function &getValue(&$data, string $path, $callLastClosure = true)
     {
         static::checkForClosure($data);
 
@@ -1261,27 +1299,27 @@ class Parser extends BaseObject
         $value = null;
 
         if (is_array($data)) {
-            $magicKeyValue = static::checkForMagicKey($data, $key);
+            $magicKeyValue = static::checkForMagicKey($data, $path);
 
             if ($magicKeyValue !== null) {
                 return $magicKeyValue;
             }
 
-            if (isset($data[$key])) {
-                static::checkForClosure($data[$key]);
+            if (isset($data[$path])) {
+                static::checkForClosure($data[$path]);
 
-                return $data[$key];
+                return $data[$path];
             }
         }
 
-        if (($pos = strrpos($key, '.')) !== false) {
-            $mainKey = substr($key, 0, $pos);
+        if (($pos = strrpos($path, '.')) !== false) {
+            $mainKey = substr($path, 0, $pos);
             $workData = static::getValue($data, $mainKey, $callLastClosure);
             $data[$mainKey] = $workData;
-            $key = substr($key, $pos + 1);
+            $path = substr($path, $pos + 1);
         }
 
-        $magicKeyValue = static::checkForMagicKey($workData, $key);
+        $magicKeyValue = static::checkForMagicKey($workData, $path);
 
         if ($magicKeyValue !== null) {
             return $magicKeyValue;
@@ -1289,10 +1327,10 @@ class Parser extends BaseObject
 
         if (is_object($workData)) {
             if (!$callLastClosure) {
-                if (method_exists($workData, $key)) {
-                    $methodName = $key;
-                } elseif (method_exists($workData, 'get' . ucfirst($key))) {
-                    $methodName = 'get' . ucfirst($key);
+                if (method_exists($workData, $path)) {
+                    $methodName = $path;
+                } elseif (method_exists($workData, 'get' . ucfirst($path))) {
+                    $methodName = 'get' . ucfirst($path);
                 }
 
                 if (isset($methodName)) {
@@ -1301,15 +1339,15 @@ class Parser extends BaseObject
                 }
             }
 
-            $value = $workData->$key;
+            $value = $workData->$path;
             return $value;
         }
 
-        if (isset($workData[$key])) {
+        if (isset($workData[$path])) {
             if (is_array($workData)) {
-                $value = &$workData[$key];
+                $value = &$workData[$path];
             } else {
-                $value = $workData[$key];
+                $value = $workData[$path];
             }
 
             static::checkForClosure($value);
@@ -1359,7 +1397,10 @@ class Parser extends BaseObject
         }
 
         if (is_numeric($value)) {
-            if (is_int($value) || mb_strpos($value, '.') === false) {
+            /**
+             * @var int|float $value
+             */
+            if (is_int($value) || mb_strpos((string)$value, '.') === false) {
                 $value = (int)$value;
                 return $value;
             }
@@ -1461,7 +1502,7 @@ class Parser extends BaseObject
      */
     protected function debugEnd(?string $debugId): void
     {
-        if ($this->mode === self::MODE_DEV) {
+        if ($this->mode === self::MODE_DEV && $debugId !== null) {
             $debugData = $this->debugData[$debugId];
 
             $currentMemory = memory_get_usage();
@@ -1507,7 +1548,7 @@ class Parser extends BaseObject
             return '0 b';
         }
 
-        return round($size / (1024 ** ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[$i];
+        return round($size / (1024 ** ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[(int)$i];
     }
 
     /**
@@ -1521,7 +1562,7 @@ class Parser extends BaseObject
                 $message .= ' | ' . $name . ': ' . $value;
             }
 
-            $this->logger->debug($message);
+            $this->getLogger()->debug($message);
         }
     }
     //endregion debug

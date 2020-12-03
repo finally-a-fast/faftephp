@@ -69,6 +69,10 @@ class VarDump extends ParserElement
     {
         ob_start();
         PHP_VERSION_ID >= 80000 ? ob_implicit_flush(false) : ob_implicit_flush(0);
+
+        /**
+         * @psalm-suppress ForbiddenCode
+         */
         var_dump($this->data['params']);
 
         return ob_get_clean();

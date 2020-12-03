@@ -146,6 +146,6 @@ class TimeTag extends ParserElement
 
         $options['datetime'] = $this->parser->formatDateTime($this->data['datetime'], $this->data['machine-format'], $machineTimeZone);
 
-        return $this->parser->htmlTag('time', $this->parser->formatDateTime($this->data['datetime'], $this->data['human-format'], $humanTimeZone), $options);
+        return $this->parser->htmlTag('time', $this->parser->formatDateTime($this->data['datetime'], $this->data['human-format'], $humanTimeZone) ?: '', $options);
     }
 }

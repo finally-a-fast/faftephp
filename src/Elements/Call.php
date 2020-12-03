@@ -81,6 +81,10 @@ class Call extends ParserElement
         $data = null;
         $closure = $this->parser->getAttributeData($this->data['function'], $data, false);
 
+        if ($closure === null) {
+            return null;
+        }
+
         $rawParams = $this->data['params'];
         unset($rawParams['function'], $rawParams['callable'], $rawParams['name']);
 

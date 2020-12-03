@@ -199,20 +199,21 @@ abstract class ParserElement extends BaseObject
      *
      * @return $this
      */
-    public function setContent($content)
+    public function setContent($content): self
     {
         $this->content = $content;
+
         return $this;
     }
     //endregion getter and setter
 
 
     /**
-     * @return ElementSetting[]|null
+     * @return ElementSetting[]
      */
-    public function elementSettings(): ?array
+    public function elementSettings(): array
     {
-        return null;
+        return [];
     }
 
     /**
@@ -297,7 +298,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @return mixed
+     * @return mixed|void
      */
     abstract public function run();
 }

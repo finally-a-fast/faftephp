@@ -39,21 +39,32 @@
         "yiisoft/cache": "^3.0",
         "yiisoft/cache-apcu": "^3.0",
         "yiisoft/log": "^3.0",
-        "yiisoft/log-target-file": "^3.0"
+        "yiisoft/log-target-file": "^3.0",
+        "vimeo/psalm": "^4.2",
+        "roave/infection-static-analysis-plugin": "^1.6",
+        "phpunit/phpunit": "^9",
+        "spatie/phpunit-watcher": "^1.23"
     },
     "config": {
+        "sort-packages": true,
         "process-timeout": 1800,
         "fxp-asset": {
             "enabled": false
         }
     },
     "scripts": {
-        "build": [
-        ]
+        "build": "",
+        "test": "phpunit --testdox --no-interaction",
+        "test-watch": "phpunit-watcher watch"
     },
     "autoload": {
         "psr-4": {
             "Faf\\TemplateEngine\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Faf\\TemplateEngine\\Tests\\": "tests"
         }
     },
     "repositories": [

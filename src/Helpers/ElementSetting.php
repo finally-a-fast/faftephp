@@ -129,25 +129,6 @@ class ElementSetting extends BaseObject
     }
 
     /**
-     * @return int
-     */
-    public function getAttribute(): int
-    {
-        return $this->attribute;
-    }
-
-    /**
-     * @param int $attribute
-     *
-     * @return $this
-     */
-    public function setAttribute(int $attribute): self
-    {
-        $this->attribute = $attribute;
-        return $this;
-    }
-
-    /**
      * @return string|null
      */
     public function getElement(): ?string
