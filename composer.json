@@ -15,8 +15,11 @@
     "authors": [
         {
             "name": "Christoph Möke",
-            "email": "christophmoeke@gmail.com",
-            "role": "Project Leader"
+            "email": "cm@finally-a-fast.com"
+        },
+        {
+            "name": "Stefan Brandenburger",
+            "email": "stefanbrandenburger6@gmail.com"
         }
     ],
     "minimum-stability": "dev",
@@ -35,15 +38,18 @@
         "ivopetkov/html5-dom-document-php": "^2.2"
     },
     "require-dev": {
+        "phpmd/phpmd": "^2.9",
+        "phpstan/phpstan": "^0.12.58",
+        "phpunit/phpunit": "^9",
+        "roave/infection-static-analysis-plugin": "^1.6",
         "roave/security-advisories": "dev-master",
+        "spatie/phpunit-watcher": "^1.23",
+        "squizlabs/php_codesniffer": "^3.5",
+        "vimeo/psalm": "^4.2",
         "yiisoft/cache": "^3.0",
         "yiisoft/cache-apcu": "^3.0",
         "yiisoft/log": "^3.0",
-        "yiisoft/log-target-file": "^3.0",
-        "vimeo/psalm": "^4.2",
-        "roave/infection-static-analysis-plugin": "^1.6",
-        "phpunit/phpunit": "^9",
-        "spatie/phpunit-watcher": "^1.23"
+        "yiisoft/log-target-file": "^3.0"
     },
     "config": {
         "sort-packages": true,

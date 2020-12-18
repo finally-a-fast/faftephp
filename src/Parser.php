@@ -139,7 +139,7 @@ class Parser extends BaseObject
     public string $name = 'fafte';
 
     /**
-     * @var array|string[]
+     * @var string[]
      */
     protected array $elements = [
         Base64Encode::class,
@@ -352,19 +352,19 @@ class Parser extends BaseObject
     }
 
     /**
-     * @return array|string[]
+     * @return string[]
      */
-    public function getElements()
+    public function getElements(): array
     {
         return $this->elements;
     }
 
     /**
-     * @param array|string[] $elements
+     * @param string[] $elements
      *
-     * @return Parser
+     * @return $this
      */
-    public function setElements($elements)
+    public function setElements(array $elements): self
     {
         $this->elements = $elements;
         $this->refresh();
@@ -372,11 +372,11 @@ class Parser extends BaseObject
     }
 
     /**
-     * @param array|string[] $elements
+     * @param string[] $elements
      *
-     * @return Parser
+     * @return $this
      */
-    public function addElements($elements)
+    public function addElements(array $elements): self
     {
         $this->elements = array_merge($this->elements, $elements);
         $this->refresh();
@@ -1110,7 +1110,7 @@ class Parser extends BaseObject
                         $hasChildren = true;
 
                         if ($childDomNodeCount > 1 && !$elementSetting->multiple) {
-                            throw new RuntimeException('Validation error of element "' . $parserElement->tagName() . '". Element containts multiple "' . $childElementTagName . '" child elements but only one is allowed!');
+                            throw new RuntimeException('Validation error of element "' . $parserElement->tagName() . '". Element contains multiple "' . $childElementTagName . '" child elements but only one is allowed!');
                         }
 
                         foreach ($childDomNodes as $childDomNode) {
@@ -1289,7 +1289,7 @@ class Parser extends BaseObject
      * @param string $path
      * @param bool   $callLastClosure
      *
-     * @return Closure|mixed|null
+     * @return mixed|null
      */
     public static function &getValue(&$data, string $path, $callLastClosure = true)
     {
@@ -1441,9 +1441,9 @@ class Parser extends BaseObject
     /**
      * @param mixed $value
      *
-     * @return mixed
+     * @return string
      */
-    public function getSafeValue($value)
+    public function getSafeValue($value): string
     {
         if (is_numeric($value)) {
             $value = (string)$value;
