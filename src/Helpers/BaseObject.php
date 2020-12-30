@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Helpers;
 
+/**
+ * Class BaseObject
+ *
+ * @package Faf\TemplateEngine\Helpers
+ */
 class BaseObject
 {
-    public function __construct($config = [])
+    /**
+     * BaseObject constructor.
+     *
+     * @param array $config
+     */
+    public function __construct(array $config = [])
     {
         foreach ($config as $name => $value) {
             $this->{'set' . ucfirst($name)}($value);

@@ -9,7 +9,8 @@ use IvoPetkov\HTML5DOMElement;
 
 /**
  * Class ParserElement
- * @package fafcms\parser
+ *
+ * @package Faf\TemplateEngine\Helpers
  */
 abstract class ParserElement extends BaseObject
 {
@@ -34,7 +35,7 @@ abstract class ParserElement extends BaseObject
     protected bool $contentAsRawData = false;
 
     /**
-     * @var array Parsed data of element
+     * @var mixed[] Parsed data of element
      */
     protected array $data = [];
 
@@ -195,7 +196,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @param $content
+     * @param mixed $content
      *
      * @return $this
      */
@@ -222,7 +223,7 @@ abstract class ParserElement extends BaseObject
     abstract public function name(): string;
 
     /**
-     * @return array
+     * @return string[]
      */
     public function aliases(): array
     {
@@ -235,7 +236,7 @@ abstract class ParserElement extends BaseObject
     abstract public function description(): string;
 
     /**
-     * @return array
+     * @return array[]|string[]
      */
     public function editorOptions(): array
     {
@@ -251,7 +252,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @return array|null
+     * @return string[]|null
      */
     public function allowedParents(): ?array
     {
@@ -276,12 +277,12 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @var array|null
+     * @var string[]|null
      */
     private ?array $tagNameAliases = null;
 
     /**
-     * @return array
+     * @return string[]
      */
     public function tagNameAliases(): array
     {
