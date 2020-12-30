@@ -665,8 +665,15 @@ class Parser extends BaseObject
     {
         $debugId = $this->debugStart('Get allowed child elements for ' . $tagName . ' of type ' . $type);
 
-        $allowedChildElementsByType = array_merge_recursive($this->allowedChildElements[''] ?? [], $this->allowedChildElements[$type] ?? []);
-        $allowedChildElementsByTag = array_merge_recursive($allowedChildElementsByType[''] ?? [], $allowedChildElementsByType[$tagName] ?? []);
+        $allowedChildElementsByType = array_merge_recursive(
+            $this->allowedChildElements[''] ?? [],
+            $this->allowedChildElements[$type] ?? []
+        );
+
+        $allowedChildElementsByTag = array_merge_recursive(
+            $allowedChildElementsByType[''] ?? [],
+            $allowedChildElementsByType[$tagName] ?? []
+        );
 
         $this->debugEnd($debugId);
 
@@ -775,8 +782,14 @@ class Parser extends BaseObject
      *
      * @return false|string
      */
-    public function formatNumber($number, int $style, string $pattern = '', array $attributes = [], array $symbols = [], array $textAttributes = [])
-    {
+    public function formatNumber(
+        $number,
+        int $style,
+        string $pattern = '',
+        array $attributes = [],
+        array $symbols = [],
+        array $textAttributes = []
+    ) {
         $numberFormatter = new NumberFormatter($this->currentLanguage, $style, $pattern);
 
         foreach ($attributes as $name => $value) {
@@ -803,8 +816,12 @@ class Parser extends BaseObject
      * @return string
      * @throws \JsonException
      */
-    public function htmlTag(string $name, string $content = '', array $options = [], string $attributePrefix = ''): string
-    {
+    public function htmlTag(
+        string $name,
+        string $content = '',
+        array $options = [],
+        string $attributePrefix = ''
+    ): string {
         /**
          * @var HTML5DOMElement $element
          */
@@ -824,15 +841,20 @@ class Parser extends BaseObject
                     continue;
                 }
 
-                if ($attributePrefix !== '') {
-                    $attribute = (mb_strpos($attribute, $attributePrefix) === 0 ? mb_substr($attribute, mb_strlen($attributePrefix)) : $attribute);
+                if ($attributePrefix !== '' && mb_strpos($attribute, $attributePrefix) === 0) {
+                    $attribute = mb_substr($attribute, mb_strlen($attributePrefix));
                 }
             }
 
             if (is_array($value) || is_object($value)) {
                 $value = json_encode(
                     $value,
-                    JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_THROW_ON_ERROR,
+                    JSON_UNESCAPED_UNICODE |
+                    JSON_HEX_QUOT |
+                    JSON_HEX_TAG |
+                    JSON_HEX_AMP |
+                    JSON_HEX_APOS |
+                    JSON_THROW_ON_ERROR,
                     512
                 );
             }
@@ -898,12 +920,19 @@ class Parser extends BaseObject
         $this->parentTagName = $this->currentTagName;
         $this->currentTagName = $currentTagName;
 
-        $parseElementDebugId = $this->debugStart('Parse element ' . $this->currentTagName . ' (parent: ' . $this->parentTagName . ')');
+        $parseElementDebugId = $this->debugStart(
+            'Parse element ' . $this->currentTagName . ' (parent: ' . $this->parentTagName . ')'
+        );
 
         $parserElements = $this->getAllowedChildElements($this->type, $this->currentTagName);
 
         $dom = new HTML5DOMDocument();
-        $dom->loadHTML('<!DOCTYPE html><html lang=""><body><' . $this->tempTagName . '>' . $this->getSafeHtml($string) . '</' . $this->tempTagName . '></body></html>', LIBXML_NONET | HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
+        $dom->loadHTML(
+            '<!DOCTYPE html><html lang=""><body><' . $this->tempTagName . '>' .
+            $this->getSafeHtml($string) .
+            '</' . $this->tempTagName . '></body></html>',
+            LIBXML_NONET | HTML5DOMDocument::ALLOW_DUPLICATE_IDS
+        );
 
         $xPath = new DOMXPath($dom);
         $filterReplacements = '//' . implode('|//', $parserElements);
@@ -1013,7 +1042,10 @@ class Parser extends BaseObject
      */
     public function fullTrim(string $string): string
     {
-        return trim(str_replace('&nbsp;', mb_chr(0xA0, 'UTF-8'), $string), " \t\n\r\0\x0B" . mb_chr(0xC2, 'UTF-8') . mb_chr(0xA0, 'UTF-8'));
+        return trim(
+            str_replace('&nbsp;', mb_chr(0xA0, 'UTF-8'), $string),
+            " \t\n\r\0\x0B" . mb_chr(0xC2, 'UTF-8') . mb_chr(0xA0, 'UTF-8')
+        );
     }
 
     protected array $specialTagMap = [];
@@ -1025,7 +1057,11 @@ class Parser extends BaseObject
      */
     protected function getSafeHtml(string $string): string
     {
-        $string = preg_replace('/<!(?<tag>[^\->]+)>/mi', '<' . $this->tempTagName . '-special>$1</' . $this->tempTagName . '-special>', $string);
+        $string = preg_replace(
+            '/<!(?<tag>[^\->]+)>/mi',
+            '<' . $this->tempTagName . '-special>$1</' . $this->tempTagName . '-special>',
+            $string
+        );
 
         return str_ireplace(
             array_keys($this->specialTagMap),
@@ -1042,8 +1078,12 @@ class Parser extends BaseObject
      *
      * @throws Exception
      */
-    protected function prepareNode(DOMXPath $xPath, HTML5DOMElement $domNode, ParserElement $parserElement, string $currentTagName): void
-    {
+    protected function prepareNode(
+        DOMXPath $xPath,
+        HTML5DOMElement $domNode,
+        ParserElement $parserElement,
+        string $currentTagName
+    ): void {
         $debugId = $this->debugStart('Prepare node ' . $currentTagName);
 
         $attributes = [];
@@ -1062,7 +1102,8 @@ class Parser extends BaseObject
 
         if ($elementSettings !== []) {
             foreach ($elementSettings as $elementSetting) {
-                $data[$elementSetting->name] = [];
+                $settingName = $elementSetting->name;
+                $data[$settingName] = [];
 
                 //region elements
                 if ($elementSetting->element !== null) {
@@ -1091,7 +1132,10 @@ class Parser extends BaseObject
                             $currentChildNode = mb_substr($currentChildNode, 0, $bracketPosition);
                         }
 
-                        if (implode('/', $childNodePathParts) === $nodePath && in_array($currentChildNode, $childElementTagNames, true)) {
+                        if (
+                            implode('/', $childNodePathParts) === $nodePath &&
+                            in_array($currentChildNode, $childElementTagNames, true)
+                        ) {
                             $childDomNodes[] = $unfilteredChildDomNode;
                         }
                     }
@@ -1102,11 +1146,25 @@ class Parser extends BaseObject
                         $hasChildren = true;
 
                         if ($childDomNodeCount > 1 && !$elementSetting->multiple) {
-                            throw new RuntimeException('Validation error of element "' . $parserElement->tagName() . '". Element contains multiple "' . $childElementTagName . '" child elements but only one is allowed!');
+                            throw new RuntimeException(
+                                sprintf(
+                                    'Validation error of element "%s".
+Element contains multiple "%s" child elements but only one is allowed!',
+                                    $parserElement->tagName(),
+                                    $childElementTagName
+                                )
+                            );
                         }
 
                         foreach ($childDomNodes as $childDomNode) {
-                            $data[$elementSetting->name][] = &$this->getData($elementSetting, $this->parseElements($childDomNode->outerHTML, $currentTagName, $elementSetting->rawData));
+                            $data[$settingName][] = &$this->getData(
+                                $elementSetting,
+                                $this->parseElements(
+                                    $childDomNode->outerHTML,
+                                    $currentTagName,
+                                    $elementSetting->rawData
+                                )
+                            );
                         }
                     }
                 }
@@ -1115,12 +1173,12 @@ class Parser extends BaseObject
                 //region attribute
                 if ($elementSetting->multiple) {
                     $multipleAttributeExpression = strtr($elementSetting->multipleAttributeExpression, [
-                        '{{name}}' => $elementSetting->name,
+                        '{{name}}' => $settingName,
                     ]);
 
                     $attributeNames = preg_grep($multipleAttributeExpression, array_keys($attributes));
                 } else {
-                    $attributeNames = array_merge([$elementSetting->name], $elementSetting->getAliases());
+                    $attributeNames = array_merge([$settingName], $elementSetting->getAliases());
                 }
 
                 foreach ($attributeNames as $attributeName) {
@@ -1130,9 +1188,9 @@ class Parser extends BaseObject
                         $attributeContent = &$this->getData($elementSetting, $attributeContent);
 
                         if ($elementSetting->attributeNameAsKey) {
-                            $data[$elementSetting->name][$attributeName] = $attributeContent;
+                            $data[$settingName][$attributeName] = $attributeContent;
                         } else {
-                            $data[$elementSetting->name][] = $attributeContent;
+                            $data[$settingName][] = $attributeContent;
                         }
                     }
 
@@ -1141,12 +1199,12 @@ class Parser extends BaseObject
                 //endregion attribute
 
                 if (!$elementSetting->multiple) {
-                    $data[$elementSetting->name] = $data[$elementSetting->name][array_key_first($data[$elementSetting->name])] ?? null;
+                    $data[$settingName] = $data[$settingName][array_key_first($data[$settingName])] ?? null;
                 }
 
                 if ($elementSetting->content) {
                     $contentElementSetting = $elementSetting;
-                    $content = $data[$elementSetting->name];
+                    $content = $data[$settingName];
                 }
             }
         }
@@ -1156,8 +1214,12 @@ class Parser extends BaseObject
 
             if ($parserElement->getParseContent()) {
                 if ($contentElementSetting !== null && $contentElementSetting->element !== null) {
-                    $contentElementSettingName = $this->parserElementsByClassName[$contentElementSetting->element]->tagName();
-                    $content = $this->parseElements('<' . $contentElementSettingName . '>' . $content . '</' . $contentElementSettingName . '>', $currentTagName, $contentElementSetting->rawData);
+                    $contentSettingName = $this->parserElementsByClassName[$contentElementSetting->element]->tagName();
+                    $content = $this->parseElements(
+                        '<' . $contentSettingName . '>' . $content . '</' . $contentSettingName . '>',
+                        $currentTagName,
+                        $contentElementSetting->rawData
+                    );
                 } else {
                     $content = $this->parseElements($content, $currentTagName, $parserElement->getContentAsRawData());
                 }
@@ -1174,7 +1236,14 @@ class Parser extends BaseObject
 
         if ($elementSettings !== []) {
             foreach ($elementSettings as $elementSetting) {
-                if ($elementSetting->defaultValue !== null && ($data[$elementSetting->name] === null || $data[$elementSetting->name] === [] || $data[$elementSetting->name] === '')) {
+                if (
+                    $elementSetting->defaultValue !== null &&
+                    (
+                        $data[$elementSetting->name] === null ||
+                        $data[$elementSetting->name] === [] ||
+                        $data[$elementSetting->name] === ''
+                    )
+                ) {
                     $data[$elementSetting->name] = $elementSetting->defaultValue;
                 }
 
@@ -1183,10 +1252,34 @@ class Parser extends BaseObject
                     $result = $rules->validate($data[$elementSetting->name]);
 
                     if ($result->isValid() === false) {
-                        throw new RuntimeException('Validation error of ElementSetting "'  . $elementSetting->name . '" of element "' . $currentTagName . '".' . PHP_EOL . 'Line: ' . $domNode->getLineNo() . PHP_EOL . 'Code: ' . $domNode->outerHTML . PHP_EOL . 'Error: ' . print_r($result->getErrors(), true));
+                        throw new RuntimeException(
+                            sprintf(
+                                'Validation error of ElementSetting "%s" of element "%s".
+Line: %s
+Code: %s
+Error: %s',
+                                $elementSetting->name,
+                                $currentTagName,
+                                $domNode->getLineNo(),
+                                $domNode->outerHTML,
+                                print_r($result->getErrors(), true)
+                            )
+                        );
                     }
-                } catch (Exception $e) {
-                    throw new RuntimeException('Cannot validate ElementSetting "'  . $elementSetting->name . '" of element "' . $currentTagName . '".' . PHP_EOL . 'Line: ' . $domNode->getLineNo() . PHP_EOL . 'Code: ' . $domNode->outerHTML . PHP_EOL . 'Error: ' . $e->getMessage());
+                } catch (Exception $exception) {
+                    throw new RuntimeException(
+                        sprintf(
+                            'Cannot validate ElementSetting "%s" of element "%s".
+Line: %s
+Code: %s
+Error: %s',
+                            $elementSetting->name,
+                            $currentTagName,
+                            $domNode->getLineNo(),
+                            $domNode->outerHTML,
+                            $exception->getMessage()
+                        )
+                    );
                 }
             }
         }
