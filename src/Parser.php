@@ -248,7 +248,7 @@ class Parser extends BaseObject
     protected int $maxDeep = 100;
 
     /**
-     * @var mixed
+     * @var array<string, mixed>
      */
     public $data;
 
@@ -266,11 +266,6 @@ class Parser extends BaseObject
      * @var float
      */
     protected float $debugStartTime;
-
-    /**
-     * @var array
-     */
-    protected array $debugData = [];
 
     /**
      * @var bool
@@ -1445,30 +1440,41 @@ class Parser extends BaseObject
     public function getSafeValue($value): string
     {
         if (is_numeric($value)) {
-            $value = (string)$value;
-        } elseif ($value === true) {
-            $value = 'true';
-        } elseif ($value === false) {
-            $value = 'false';
-        } elseif (is_string($value)) {
-            $value = '\'' . $value . '\'';
-        } else {
-            if (!isset($this->data['temp-data-storage'])) {
-                $this->data['temp-data-storage'] = [];
-            }
-
-            $count = count($this->data['temp-data-storage']);
-            $tempName = 'temp-data-storage.' . $count;//.?
-            $this->setAttributeData($tempName, $value);
-            /** @noinspection UselessUnsetInspection */
-            unset($value);
-            $value = $tempName;
+            return (string)$value;
         }
+
+        if ($value === true) {
+            return 'true';
+        }
+
+        if ($value === false) {
+            return 'false';
+        }
+
+        if (is_string($value)) {
+            return '\'' . $value . '\'';
+        }
+
+        if (!isset($this->data['temp-data-storage']) || !is_array($this->data['temp-data-storage'])) {
+            $this->data['temp-data-storage'] = [];
+        }
+
+        $count = count($this->data['temp-data-storage']);
+        $tempName = 'temp-data-storage.' . $count;//.?
+        $this->setAttributeData($tempName, $value);
+        /** @noinspection UselessUnsetInspection */
+        unset($value);
+        $value = $tempName;
 
         return $value;
     }
 
     //region debug
+    /**
+     * @var array<string, array{message: string, memory: int, time: float}>
+     */
+    protected array $debugData = [];
+
     /**
      * @param string $message
      *
@@ -1537,18 +1543,18 @@ class Parser extends BaseObject
      */
     protected function getHumanSize(int $size): string
     {
-        $unit = ['b','kb','mb','gb','tb','pb'];
+        $units = ['b','kb','mb','gb','tb','pb'];
 
         if ($size === 0) {
             return '0 b';
         }
 
-        return round($size / (1024 ** ($i = floor(log($size, 1024)))), 2) . ' ' . $unit[(int)$i];
+        return round($size / (1024 ** ($unitIndex = floor(log($size, 1024)))), 2) . ' ' . $units[(int)$unitIndex];
     }
 
     /**
      * @param string $message
-     * @param array  $extras
+     * @param array<string, string> $extras
      */
     protected function debug(string $message, array $extras = []): void
     {

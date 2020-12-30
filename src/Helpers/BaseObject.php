@@ -14,12 +14,14 @@ class BaseObject
     /**
      * BaseObject constructor.
      *
-     * @param array $config
+     * @param array<string, array|string|int|bool|object>|null $config
      */
-    public function __construct(array $config = [])
+    public function __construct(?array $config = null)
     {
-        foreach ($config as $name => $value) {
-            $this->{'set' . ucfirst($name)}($value);
+        if ($config !== null) {
+            foreach ($config as $name => $value) {
+                $this->{'set' . ucfirst($name)}($value);
+            }
         }
 
         $this->init();
