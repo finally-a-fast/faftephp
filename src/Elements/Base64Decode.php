@@ -62,6 +62,6 @@ class Base64Decode extends ParserElement
      */
     public function run()
     {
-        return base64_decode($this->data['string'], $this->data['strict']);
+        return base64_decode((string)$this->data['string'], (bool)$this->data['strict']);
     }
 }

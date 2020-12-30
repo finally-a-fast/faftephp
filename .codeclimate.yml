@@ -1,0 +1,22 @@
+version: "2"
+plugins:
+    duplication:
+        enabled: true
+        config:
+            languages:
+                - javascript
+                - php
+    fixme:
+        enabled: true
+    phpmd:
+        enabled: true
+        config:
+            file_extensions:
+                - php
+            rulesets: "ruleset.xml"
+    phpcodesniffer:
+        enabled: true
+        channel: beta
+        config:
+            file_extensions: "php"
+            standard: "PSR12"

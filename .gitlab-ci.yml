@@ -6,13 +6,12 @@ before_script:
     - apt-get update -yqq
     - apt-get install -yqq rsync git libonig-dev libmcrypt-dev libpq-dev libcurl4-gnutls-dev libicu-dev libvpx-dev libjpeg-dev libpng-dev libxpm-dev zlib1g-dev libfreetype6-dev libxml2-dev libexpat1-dev libbz2-dev libgmp3-dev libldap2-dev unixodbc-dev libsqlite3-dev libaspell-dev libsnmp-dev libpcre3-dev libtidy-dev zip unzip
     # Install & enable Xdebug for code coverage reports
-    #- pecl install xdebug
-    #- docker-php-ext-enable xdebug
+    - pecl install xdebug apcu
+    - docker-php-ext-enable xdebug apcu
+    - pecl clear-cache
     # Install PHP extensions
     - docker-php-source extract
-    - mkdir -p /usr/src/php/ext/apcu
-    - curl -fsSL https://github.com/krakjoe/apcu/archive/v5.1.19.tar.gz | tar xvz -C /usr/src/php/ext/apcu --strip 1
-    - docker-php-ext-install apcu curl json intl gd xml opcache dom
+    - docker-php-ext-install curl json intl gd xml opcache dom
     - docker-php-source delete
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
@@ -23,19 +22,9 @@ before_script:
     - git config --global user.name "FAF Bot"
     - curl -sS https://getcomposer.org/installer | php
 
-# Bring in any services we need http://docs.gitlab.com/ee/ci/docker/using_docker_images.html#what-is-a-service
-# See http://docs.gitlab.com/ce/ci/services/README.html for examples.
-
-
-# Set any variables we need
-variables:
-    # Configure mysql environment variables (https://hub.docker.com/r/_/mysql/)
-    MYSQL_DATABASE: mysql_database
-    MYSQL_ROOT_PASSWORD: mysql_strong_password
-
 stages:
     - build
-    #    - test
+    - test
     - docs
     - deploy
 
@@ -58,19 +47,121 @@ build:
             - build
         expire_in: 1 day
 
-# Run our tests
-# If Xdebug was installed you can generate a coverage report and see code coverage metrics.
-#
-#test:
-#        services:
-#            - mysql:5.7
-#    stage: test
-#    only:
-#        - dev
-#        - build
-#    script:
-#        - echo "test"
-##    - vendor/bin/phpunit --configuration phpunit.xml --coverage-text --colors=never
+include:
+    - template: Code-Quality.gitlab-ci.yml
+
+code_quality:
+    before_script:
+        - ''
+
+code_quality_html:
+    extends: code_quality
+    variables:
+        REPORT_FORMAT: html
+    artifacts:
+        reports:
+            codequality: ''
+        expose_as: "Code Quality"
+        paths: [ gl-code-quality-report.html ]
+
+phpunit:php74:
+    stage: test
+    only:
+        - dev
+        - build
+    script:
+        - cd build
+        - XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text --colors=never --log-junit ../report-phpunit74.xml
+    allow_failure: true
+    artifacts:
+        when: always
+        reports:
+            junit: report-phpunit74.xml
+
+phpunit:php8:
+    image: php:8.0-cli
+    stage: test
+    only:
+        - dev
+        - build
+    script:
+        - cd build
+        - XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text --colors=never --log-junit ../report-phpunit80.xml
+    allow_failure: true
+    artifacts:
+        when: always
+        reports:
+            junit: report-phpunit80.xml
+
+phpstan:
+    stage: test
+    only:
+        - dev
+        - build
+    script:
+        - cd build
+        - vendor/bin/phpstan analyse --error-format=junit --no-progress --no-interaction --memory-limit=-1 > ../report-phpstan.xml
+    allow_failure: true
+    artifacts:
+        when: always
+        reports:
+            junit: report-phpstan.xml
+
+psalm:
+    stage: test
+    only:
+        - dev
+        - build
+    script:
+        - cd build
+        - vendor/bin/psalm --output-format=junit --no-progress > ../report-psalm.xml
+    allow_failure: true
+    artifacts:
+        when: always
+        reports:
+            junit: report-psalm.xml
+
+phpmd:
+    stage: test
+    only:
+        - dev
+        - build
+    script:
+        - cd build
+        - vendor/bin/phpmd src html ruleset.xml > ../report-phpmess.html
+    allow_failure: true
+    artifacts:
+        when: always
+        expose_as: "PHP Mess Detector"
+        paths: [ report-phpmess.html ]
+
+infection:
+    stage: test
+    only:
+        - dev
+        - build
+    script:
+        - cd build
+        - XDEBUG_MODE=coverage vendor/bin/roave-infection-static-analysis-plugin --no-progress --no-interaction
+    allow_failure: true
+    artifacts:
+        when: always
+        expose_as: "Infection"
+        paths: [ build/infection.log, build/infection-summary.log ]
+
+phpcs:
+    stage: test
+    only:
+        - dev
+        - build
+    script:
+        - cd build
+        - vendor/bin/phpcs --report=junit > ../report-phpcs.xml
+    allow_failure: true
+    artifacts:
+        when: always
+        reports:
+            junit: report-phpcs.xml
 
 docs:
     stage: docs

@@ -265,7 +265,6 @@ abstract class ParserElement extends BaseObject
      */
     public function bootstrap(): void
     {
-
     }
 
     /**

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Faf\TemplateEngine;
 
 use Closure;
-
 use DateTime;
 use DateTimeZone;
 use Faf\TemplateEngine\Elements\Trim;
@@ -18,7 +17,6 @@ use IntlTimeZone;
 use IvoPetkov\HTML5DOMElement;
 use IvoPetkov\HTML5DOMDocument;
 use DOMXPath;
-
 use Faf\TemplateEngine\Elements\{Base64Decode,
     Base64Encode,
     Calc,
@@ -104,7 +102,6 @@ use Faf\TemplateEngine\Elements\{Base64Decode,
     UcWordsDelimiters,
     UcWordsString,
     VarDump};
-
 use Faf\TemplateEngine\Helpers\BaseObject;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
@@ -911,7 +908,7 @@ class Parser extends BaseObject
         $parserElements = $this->getAllowedChildElements($this->type, $this->currentTagName);
 
         $dom = new HTML5DOMDocument();
-        $dom->loadHTML('<!DOCTYPE html><html lang=""><body><'.$this->tempTagName.'>' . $this->getSafeHtml($string) . '</'.$this->tempTagName.'></body></html>', LIBXML_NONET | HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
+        $dom->loadHTML('<!DOCTYPE html><html lang=""><body><' . $this->tempTagName . '>' . $this->getSafeHtml($string) . '</' . $this->tempTagName . '></body></html>', LIBXML_NONET | HTML5DOMDocument::ALLOW_DUPLICATE_IDS);
 
         $xPath = new DOMXPath($dom);
         $filterReplacements = '//' . implode('|//', $parserElements);
@@ -1033,7 +1030,7 @@ class Parser extends BaseObject
      */
     protected function getSafeHtml(string $string): string
     {
-        $string = preg_replace('/<!(?<tag>[^\->]+)>/mi', '<'.$this->tempTagName.'-special>$1</'.$this->tempTagName.'-special>', $string);
+        $string = preg_replace('/<!(?<tag>[^\->]+)>/mi', '<' . $this->tempTagName . '-special>$1</' . $this->tempTagName . '-special>', $string);
 
         return str_ireplace(
             array_keys($this->specialTagMap),
@@ -1423,8 +1420,10 @@ class Parser extends BaseObject
             return $value;
         }
 
-        if ((mb_strpos($value, '\'') === 0 && mb_strrpos($value, '\'') === mb_strlen($value) - 1) ||
-            (mb_strpos($value, '"') === 0 && mb_strrpos($value, '"') === mb_strlen($value) - 1)) {
+        if (
+            (mb_strpos($value, '\'') === 0 && mb_strrpos($value, '\'') === mb_strlen($value) - 1) ||
+            (mb_strpos($value, '"') === 0 && mb_strrpos($value, '"') === mb_strlen($value) - 1)
+        ) {
             $value = mb_substr($value, 1, -1);
             return $value;
         }
@@ -1486,7 +1485,7 @@ class Parser extends BaseObject
                 'time' => microtime(true)
             ];
 
-            $this->debug(str_repeat('│ ', count($this->debugData) - 1) . '┌─ '. $message);
+            $this->debug(str_repeat('│ ', count($this->debugData) - 1) . '┌─ ' . $message);
             return $debugId;
         }
 
@@ -1508,7 +1507,7 @@ class Parser extends BaseObject
 
             unset($this->debugData[$debugId]);
 
-            $this->debug(str_repeat('│ ', count($this->debugData)) . '└─ '. $debugData['message'], [
+            $this->debug(str_repeat('│ ', count($this->debugData)) . '└─ ' . $debugData['message'], [
                 'memory' => $this->getHumanSize($memory),
                 'time' => $this->getHumanTime($debugData['time'], $currentTime),
             ]);

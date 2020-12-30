@@ -50,17 +50,17 @@ class ConditionalStatement extends ParserElement
                'label' => 'Condition',
                'element' => ConditionalStatementCondition::class,
                'rawData' => true,
-           ]),
+            ]),
            new ElementSetting([
                'name' => 'then',
                'label' => 'Then',
                'element' => ConditionalStatementThen::class,
-           ]),
+            ]),
            new ElementSetting([
                'name' => 'else',
                'label' => 'Else',
                'element' => ConditionalStatementElse::class,
-           ]),
+            ]),
         ];
     }
 
