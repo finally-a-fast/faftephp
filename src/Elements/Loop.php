@@ -139,7 +139,13 @@ class Loop extends ParserElement
                     $result .= $childResult;
                 }
 
-                if ($wrapStep !== null && ($numericIndex % $wrapStep === $wrapStep - 1 || $numericIndex === $itemCount)) {
+                if (
+                    $wrapStep !== null &&
+                    (
+                        $numericIndex % $wrapStep === $wrapStep - 1 ||
+                        $numericIndex === $itemCount
+                    )
+                ) {
                     $result .= $this->parser->htmlTag($wrapTag, $wrapStore, $wrapOptions, 'wrap-tag-');
                 }
 

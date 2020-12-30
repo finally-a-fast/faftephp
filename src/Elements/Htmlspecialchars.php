@@ -6,8 +6,6 @@ namespace Faf\TemplateEngine\Elements;
 
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
-use Yiisoft\Validator\Rule\Boolean;
-use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class Htmlspecialchars

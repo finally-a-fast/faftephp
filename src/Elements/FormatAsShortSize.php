@@ -79,8 +79,28 @@ class FormatAsShortSize extends ParserElement
             '1024' => ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'],
         ],
         'full' => [
-            'default' => ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte', 'exabyte', 'zettabyte', 'yottabyte'],
-            '1024' => ['byte', 'kibibyte', 'mebibyte', 'gibibyte', 'tebibyte', 'pebibyte', 'exbibyte', 'zebibyte', 'yobibyte'],
+            'default' => [
+                'byte',
+                'kilobyte',
+                'megabyte',
+                'gigabyte',
+                'terabyte',
+                'petabyte',
+                'exabyte',
+                'zettabyte',
+                'yottabyte'
+            ],
+            '1024' => [
+                'byte',
+                'kibibyte',
+                'mebibyte',
+                'gibibyte',
+                'tebibyte',
+                'pebibyte',
+                'exbibyte',
+                'zebibyte',
+                'yobibyte'
+            ],
         ],
     ];
 

@@ -131,7 +131,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @return array
+     * @return mixed[]
      */
     public function getData(): array
     {
@@ -139,7 +139,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @param array $data
+     * @param mixed[] $data
      *
      * @return $this
      */
