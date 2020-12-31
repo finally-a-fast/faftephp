@@ -14,8 +14,11 @@ use IvoPetkov\HTML5DOMElement;
  */
 abstract class ParserElement extends BaseObject
 {
+    use TagTrait;
+
     /**
      * @var Parser
+     * @psalm-suppress PropertyNotSetInConstructor
      */
     protected Parser $parser;
 
@@ -40,19 +43,20 @@ abstract class ParserElement extends BaseObject
     protected array $data = [];
 
     /**
-     * @var array Raw attributes of element
+     * @var array<string, string> Raw attributes of element
      */
     protected array $attributes = [];
-
-    /**
-     * @var array Raw child elements of element
-     */
-    protected array $elements = [];
 
     /**
      * @var mixed Content of element
      */
     protected $content;
+
+    /**
+     * @var HTML5DOMElement The current dom node
+     * @psalm-suppress PropertyNotSetInConstructor
+     */
+    protected HTML5DOMElement $domNode;
 
     //region getter and setter
     /**
@@ -73,8 +77,6 @@ abstract class ParserElement extends BaseObject
         $this->parser = $parser;
         return $this;
     }
-
-    protected HTML5DOMElement $domNode;
 
     /**
      * @return HTML5DOMElement
@@ -117,7 +119,7 @@ abstract class ParserElement extends BaseObject
     /**
      * @return bool
      */
-    public function getParseContent(): bool
+    public function isContentParsed(): bool
     {
         return $this->parseContent;
     }
@@ -125,7 +127,7 @@ abstract class ParserElement extends BaseObject
     /**
      * @return bool
      */
-    public function getContentAsRawData(): bool
+    public function isContentRawData(): bool
     {
         return $this->contentAsRawData;
     }
@@ -150,7 +152,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     public function getAttributes(): array
     {
@@ -158,32 +160,13 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @param array $attributes
+     * @param array<string, string> $attributes
      *
      * @return $this
      */
     public function setAttributes(array $attributes): self
     {
         $this->attributes = $attributes;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getElements(): array
-    {
-        return $this->elements;
-    }
-
-    /**
-     * @param array $elements
-     *
-     * @return $this
-     */
-    public function setElements(array $elements): self
-    {
-        $this->elements = $elements;
         return $this;
     }
 
@@ -207,7 +190,6 @@ abstract class ParserElement extends BaseObject
         return $this;
     }
     //endregion getter and setter
-
 
     /**
      * @return ElementSetting[]
@@ -244,7 +226,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @return array|null
+     * @return int[]|null
      */
     public function allowedTypes(): ?array
     {
@@ -266,35 +248,6 @@ abstract class ParserElement extends BaseObject
      */
     public function bootstrap(): void
     {
-    }
-
-    /**
-     * @return string
-     */
-    public function tagName(): string
-    {
-        return ($this->prefixParserName ? $this->parser->name . '-' : '') . $this->name();
-    }
-
-    /**
-     * @var string[]|null
-     */
-    private ?array $tagNameAliases = null;
-
-    /**
-     * @return string[]
-     */
-    public function tagNameAliases(): array
-    {
-        if ($this->tagNameAliases === null) {
-            $this->tagNameAliases = [];
-
-            foreach ($this->aliases() as $alias) {
-                $this->tagNameAliases[] = ($this->prefixParserName ? $this->parser->name . '-' : '') . $alias;
-            }
-        }
-
-        return $this->tagNameAliases;
     }
 
     /**

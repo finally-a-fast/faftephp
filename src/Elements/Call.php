@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use Exception;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\DataHelper;
 use Faf\TemplateEngine\Helpers\ParserElement;
@@ -13,6 +14,7 @@ use Yiisoft\Validator\Rule\Required;
  * Class Call
  *
  * @package fafcms\parser\elements
+ * @property array{function: string, params: array} $data
  */
 class Call extends ParserElement
 {
@@ -74,7 +76,9 @@ class Call extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @throws \Exception
+     * @return bool|null|mixed
+     * @throws Exception
+     * @noinspection PhpMissingReturnTypeInspection
      */
     public function run()
     {

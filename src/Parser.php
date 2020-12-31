@@ -7,6 +7,7 @@ namespace Faf\TemplateEngine;
 use Closure;
 use DateTime;
 use DateTimeZone;
+use DOMNode;
 use Faf\TemplateEngine\Elements\Trim;
 use Faf\TemplateEngine\Elements\TrimString;
 use Faf\TemplateEngine\Elements\TrimCharlist;
@@ -288,7 +289,7 @@ class Parser extends BaseObject
     protected array $parserElements;
 
     /**
-     * @var array
+     * @var ParserElement[]
      */
     protected array $parserElementsByClassName;
 
@@ -1086,16 +1087,28 @@ class Parser extends BaseObject
     ): void {
         $debugId = $this->debugStart('Prepare node ' . $currentTagName);
 
+        /**
+         * @var array<string, string> $attributes
+         */
         $attributes = [];
+
         $data = [];
-        $elements = [];
         $hasChildren = false;
-        $contentElementSetting = null;
+        $contentSetting = null;
         $content = null;
+
+        /**
+         * @var string|null $nodePath
+         */
         $nodePath = $domNode->getNodePath();
 
-        foreach ($domNode->attributes as $attr) {
-            $attributes[$attr->nodeName] = $attr->nodeValue;
+        if (!empty($domNode->attributes)) {
+            /**
+             * @var DOMNode $attr
+             */
+            foreach ($domNode->attributes as $attr) {
+                $attributes[$attr->nodeName] = $attr->nodeValue;
+            }
         }
 
         $elementSettings = $parserElement->elementSettings();
@@ -1114,38 +1127,47 @@ class Parser extends BaseObject
                         $this->parserElementsByClassName[$elementSetting->element]->tagNameAliases()
                     );
 
-                    $unfilteredChildDomNodes = $xPath->query('//' . implode('|//', $childElementTagNames));
-                    $childDomNodes = [];
+                    $unfilteredChildNodes = $xPath->query('//' . implode('|//', $childElementTagNames));
+                    $childNodes = [];
 
-                    /**
-                     * @var HTML5DOMElement $unfilteredChildDomNode
-                     */
-                    foreach ($unfilteredChildDomNodes as $unfilteredChildDomNode) {
-                        $childNodePath = $unfilteredChildDomNode->getNodePath();
+                    if ($unfilteredChildNodes !== false) {
+                        /**
+                         * @var HTML5DOMElement $unfilteredChildNode
+                         */
+                        foreach ($unfilteredChildNodes as $unfilteredChildNode) {
+                            /**
+                             * @var string|null $childNodePath
+                             */
+                            $childNodePath = $unfilteredChildNode->getNodePath();
 
-                        $childNodePathParts = explode('/', $childNodePath);
-                        $currentChildNode = array_pop($childNodePathParts);
+                            if ($childNodePath === null) {
+                                continue;
+                            }
 
-                        $bracketPosition = mb_strpos($currentChildNode, '[');
+                            $childNodePathParts = explode('/', $childNodePath);
+                            $currentChildNode = array_pop($childNodePathParts);
 
-                        if ($bracketPosition !== false) {
-                            $currentChildNode = mb_substr($currentChildNode, 0, $bracketPosition);
-                        }
+                            $bracketPosition = mb_strpos($currentChildNode, '[');
 
-                        if (
-                            implode('/', $childNodePathParts) === $nodePath &&
-                            in_array($currentChildNode, $childElementTagNames, true)
-                        ) {
-                            $childDomNodes[] = $unfilteredChildDomNode;
+                            if ($bracketPosition !== false) {
+                                $currentChildNode = mb_substr($currentChildNode, 0, $bracketPosition);
+                            }
+
+                            if (
+                                implode('/', $childNodePathParts) === $nodePath &&
+                                in_array($currentChildNode, $childElementTagNames, true)
+                            ) {
+                                $childNodes[] = $unfilteredChildNode;
+                            }
                         }
                     }
 
-                    $childDomNodeCount = count($childDomNodes);
+                    $childNodeCount = count($childNodes);
 
-                    if ($childDomNodeCount > 0) {
+                    if ($childNodeCount > 0) {
                         $hasChildren = true;
 
-                        if ($childDomNodeCount > 1 && !$elementSetting->multiple) {
+                        if ($childNodeCount > 1 && !$elementSetting->multiple) {
                             throw new RuntimeException(
                                 sprintf(
                                     'Validation error of element "%s".
@@ -1156,11 +1178,11 @@ Element contains multiple "%s" child elements but only one is allowed!',
                             );
                         }
 
-                        foreach ($childDomNodes as $childDomNode) {
+                        foreach ($childNodes as $childNode) {
                             $data[$settingName][] = &$this->getData(
                                 $elementSetting,
                                 $this->parseElements(
-                                    $childDomNode->outerHTML,
+                                    $childNode->outerHTML,
                                     $currentTagName,
                                     $elementSetting->rawData
                                 )
@@ -1203,7 +1225,7 @@ Element contains multiple "%s" child elements but only one is allowed!',
                 }
 
                 if ($elementSetting->content) {
-                    $contentElementSetting = $elementSetting;
+                    $contentSetting = $elementSetting;
                     $content = $data[$settingName];
                 }
             }
@@ -1212,22 +1234,22 @@ Element contains multiple "%s" child elements but only one is allowed!',
         if ($content === null && !$hasChildren) {
             $content = $domNode->innerHTML;
 
-            if ($parserElement->getParseContent()) {
-                if ($contentElementSetting !== null && $contentElementSetting->element !== null) {
-                    $contentSettingName = $this->parserElementsByClassName[$contentElementSetting->element]->tagName();
+            if ($parserElement->isContentParsed()) {
+                if ($contentSetting !== null && $contentSetting->element !== null) {
+                    $contentSettingName = $this->parserElementsByClassName[$contentSetting->element]->tagName();
                     $content = $this->parseElements(
                         '<' . $contentSettingName . '>' . $content . '</' . $contentSettingName . '>',
                         $currentTagName,
-                        $contentElementSetting->rawData
+                        $contentSetting->rawData
                     );
                 } else {
-                    $content = $this->parseElements($content, $currentTagName, $parserElement->getContentAsRawData());
+                    $content = $this->parseElements($content, $currentTagName, $parserElement->isContentRawData());
                 }
             }
 
-            if ($contentElementSetting !== null) {
-                $data[$contentElementSetting->name] = &$this->getData($contentElementSetting, $content);
-                $content = &$data[$contentElementSetting->name];
+            if ($contentSetting !== null) {
+                $data[$contentSetting->name] = &$this->getData($contentSetting, $content);
+                $content = &$data[$contentSetting->name];
             }
         }
 
@@ -1288,7 +1310,6 @@ Error: %s',
         $parserElement->setData($data)
             ->setContent($content)
             ->setAttributes($attributes)
-            ->setElements($elements)
             ->setDomNode($domNode);
 
         $this->debugEnd($debugId);
@@ -1310,13 +1331,13 @@ Error: %s',
     }
 
     /**
-     * @param      $name
-     * @param null $data
-     * @param bool $callLastClosure
+     * @param string $name
+     * @param null   $data
+     * @param bool   $callLastClosure
      *
      * @return mixed|null
      */
-    public function &getAttributeData($name, &$data = null, $callLastClosure = true)
+    public function &getAttributeData(string $name, &$data = null, bool $callLastClosure = true)
     {
         if ($data === null) {
             $data = &$this->data;
@@ -1376,7 +1397,7 @@ Error: %s',
      *
      * @return mixed|null
      */
-    public static function &getValue(&$data, string $path, $callLastClosure = true)
+    public static function &getValue(&$data, string $path, bool $callLastClosure = true)
     {
         static::checkForClosure($data);
 

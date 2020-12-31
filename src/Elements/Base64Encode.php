@@ -12,6 +12,7 @@ use Yiisoft\Validator\Rule\Required;
  * Class Base64Encode
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{string: string} $data
  */
 class Base64Encode extends ParserElement
 {
@@ -50,8 +51,9 @@ class Base64Encode extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
         return base64_encode($this->data['string']);
     }

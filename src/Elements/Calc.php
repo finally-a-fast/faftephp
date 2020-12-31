@@ -13,6 +13,7 @@ use jlawrence\eos\Parser as EosParser;
  * Class Calc
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{equation: string} $data
  */
 class Calc extends ParserElement
 {
@@ -64,8 +65,9 @@ class Calc extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return float
      */
-    public function run()
+    public function run(): float
     {
         $equation = $this->data['equation'];
 

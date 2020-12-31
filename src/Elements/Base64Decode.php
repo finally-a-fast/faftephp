@@ -13,6 +13,7 @@ use Yiisoft\Validator\Rule\Required;
  * Class Base64Decode
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{string: string, strict: bool} $data
  */
 class Base64Decode extends ParserElement
 {
@@ -59,9 +60,10 @@ class Base64Decode extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string|false
      */
     public function run()
     {
-        return base64_decode((string)$this->data['string'], (bool)$this->data['strict']);
+        return base64_decode($this->data['string'], $this->data['strict']);
     }
 }
