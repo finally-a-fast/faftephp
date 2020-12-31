@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use Exception;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
-use IntlDateFormatter;
+use JsonException;
 use Yiisoft\Validator\Rule\Required;
 
 /**
@@ -47,8 +48,10 @@ class Loop extends ParserElement
     {
         return [
             new ElementSetting([
-                'name' => 'each',
-                'aliases' => [],
+                'name' => 'loop-each',
+                'aliases' => [
+                    'each'
+                ],
                 'label' => 'Each',
                 'safeData' => false,
                 'element' => LoopEach::class,
@@ -57,7 +60,10 @@ class Loop extends ParserElement
                 ]
             ]),
             new ElementSetting([
-                'name' => 'as',
+                'name' => 'loop-as',
+                'aliases' => [
+                    'as'
+                ],
                 'label' => 'As',
                 'element' => LoopAs::class,
                 'rules' => [
@@ -98,63 +104,146 @@ class Loop extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @throws \Exception
+     * @return string
+     * @throws JsonException
+     * @throws Exception
      */
-    public function run()
+    public function run(): string
     {
-        $each = $this->data['each'];
-        $as = $this->data['as'];
+        /**
+         * @var string $loopEach
+         */
+        $loopEach = $this->data['loop-each'];
+
+        /**
+         * @var string $loopAs
+         */
+        $loopAs = $this->data['loop-as'];
+
+        /**
+         * @var string $body
+         */
         $body = $this->data['body'];
+
+        /**
+         * @var int|null $wrapStep
+         */
         $wrapStep = $this->data['wrap-step'];
+
+        /**
+         * @var string $wrapTag
+         */
         $wrapTag = $this->data['wrap-tag'];
+
+        /**
+         * @var  array<string|int, array|string|int|float|bool|object>|null $wrapOptions
+         */
         $wrapOptions = $this->data['wrap-attributes'];
 
         $result = '';
 
-        $loopDatas = $this->parser->getRawValue($each);
+        /**
+         * @var array<string|int, array|string|int|float|bool|object> $loopItems
+         */
+        $loopItems = $this->parser->getRawValue($loopEach);
 
-        if ($loopDatas !== null) {
-            $data = $this->parser->data[$as] ?? null;
-            $numericIndex = 0;
-            $wrapStore = '';
-            $itemCount = count($loopDatas) - 1;
+        $data = $this->parser->data[$loopAs] ?? null;
 
-            foreach ($loopDatas as $loopIndex => $loopData) {
-                $currentIndex = ((is_numeric($loopIndex)) ? $loopIndex + 1 : $loopIndex);
-                $this->parser->data[$each . '.$$index'] = $currentIndex;
-                $this->parser->data[$as . '.$$index'] = $currentIndex;
-                $this->parser->data[$each . '.$$numericIndex'] = $numericIndex;
-                $this->parser->data[$as . '.$$numericIndex'] = $numericIndex;
-                $this->parser->data[$as] = $loopData;
+        $numericIndex = 0;
+        $wrapStore = '';
+        $itemCount = count($loopItems) - 1;
 
-                if ($wrapStep !== null && $numericIndex % $wrapStep === 0) {
-                    $wrapStore = '';
-                }
+        foreach ($loopItems as $loopIndex => $loopItem) {
+            /**
+             * @var string|int $currentIndex
+             */
+            $currentIndex = ((is_numeric($loopIndex)) ? $loopIndex + 1 : $loopIndex);
 
-                $childResult = $this->parser->parseElements($body, $this->parser->getCurrentTagName());
+            $this->setLoopItemData($loopEach, $loopAs, $currentIndex, $numericIndex, $loopItem);
 
-                if ($wrapStep !== null) {
-                    $wrapStore .= $childResult;
-                } else {
-                    $result .= $childResult;
-                }
+            $result .= $this->handleLoopItem(
+                $wrapStep,
+                $numericIndex,
+                $body,
+                $itemCount,
+                $wrapTag,
+                $wrapStore,
+                $wrapOptions
+            );
 
-                if (
-                    $wrapStep !== null &&
-                    (
-                        $numericIndex % $wrapStep === $wrapStep - 1 ||
-                        $numericIndex === $itemCount
-                    )
-                ) {
-                    $result .= $this->parser->htmlTag($wrapTag, $wrapStore, $wrapOptions, 'wrap-tag-');
-                }
+            $numericIndex++;
+        }
 
-                $numericIndex++;
-            }
-
-            $this->data[$as] = $data;
+        if ($data !== null) {
+            $this->data[$loopAs] = $data;
         }
 
         return $result;
+    }
+
+    /**
+     * @param string                                               $loopEach
+     * @param string                                               $loopAs
+     * @param string|int                                           $currentIndex
+     * @param int                                                  $numericIndex
+     * @param array<int|string,mixed>|string|int|float|bool|object $loopItem
+     */
+    protected function setLoopItemData(
+        string $loopEach,
+        string $loopAs,
+        $currentIndex,
+        int $numericIndex,
+        $loopItem
+    ): void {
+        $this->parser->data[$loopEach . '.$$index'] = $currentIndex;
+        $this->parser->data[$loopAs . '.$$index'] = $currentIndex;
+        $this->parser->data[$loopEach . '.$$numericIndex'] = $numericIndex;
+        $this->parser->data[$loopAs . '.$$numericIndex'] = $numericIndex;
+        $this->parser->data[$loopAs] = $loopItem;
+    }
+
+    /**
+     * @param int|null                                                   $wrapStep
+     * @param int                                                        $numericIndex
+     * @param string                                                     $body
+     * @param int                                                        $itemCount
+     * @param string                                                     $wrapTag
+     * @param string                                                     $wrapStore
+     * @param array<string|int, array|string|int|float|bool|object>|null $wrapOptions
+     *
+     * @return string
+     * @throws JsonException
+     * @throws Exception
+     */
+    protected function handleLoopItem(
+        ?int $wrapStep,
+        int $numericIndex,
+        string $body,
+        int $itemCount,
+        string $wrapTag,
+        string &$wrapStore,
+        ?array $wrapOptions
+    ): string {
+        if ($wrapStep !== null && $numericIndex % $wrapStep === 0) {
+            $wrapStore = '';
+        }
+
+        $childResult = $this->parser->parseElements($body, $this->parser->getCurrentTagName());
+
+        if (!is_string($childResult)) {
+            return '';
+        }
+
+        if ($wrapStep === null) {
+            return $childResult;
+        }
+
+        $wrapStore .= $childResult;
+
+        if ($numericIndex % $wrapStep === $wrapStep - 1 || $numericIndex === $itemCount) {
+            return $this->parser->htmlTag($wrapTag, $wrapStore, $wrapOptions, 'wrap-tag-');
+        }
+
+        return '';
     }
 }

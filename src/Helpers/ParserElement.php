@@ -38,7 +38,7 @@ abstract class ParserElement extends BaseObject
     protected bool $contentAsRawData = false;
 
     /**
-     * @var mixed[] Parsed data of element
+     * @var array<string|int, array|string|int|float|bool|object> Parsed data of element
      */
     protected array $data = [];
 
@@ -133,7 +133,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @return mixed[]
+     * @return array<string|int, array|string|int|float|bool|object>
      */
     public function getData(): array
     {
@@ -141,7 +141,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @param mixed[] $data
+     * @param array<string|int, array|string|int|float|bool|object> $data
      *
      * @return $this
      */

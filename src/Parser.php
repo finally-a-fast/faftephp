@@ -106,6 +106,7 @@ use Faf\TemplateEngine\Elements\{Base64Decode,
 use Faf\TemplateEngine\Helpers\BaseObject;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
+use JsonException;
 use Locale;
 use NumberFormatter;
 use Psr\Log\LoggerInterface;
@@ -249,9 +250,9 @@ class Parser extends BaseObject
     protected int $maxDeep = 100;
 
     /**
-     * @var array<string, mixed>
+     * @var array<string|int, array|string|int|float|bool|object>
      */
-    public $data;
+    public array $data = [];
 
     /**
      * @var string|null
@@ -441,11 +442,11 @@ class Parser extends BaseObject
     }
 
     /**
-     * @param $data
+     * @param array<string|int, array|string|int|float|bool|object> $data
      *
      * @return $this
      */
-    public function setData(&$data): self
+    public function setData(array &$data): self
     {
         $this->data = &$data;
 
@@ -809,18 +810,18 @@ class Parser extends BaseObject
     }
 
     /**
-     * @param string $name
-     * @param string $content
-     * @param array  $options
-     * @param string $attributePrefix
+     * @param string                                                     $name
+     * @param string                                                     $content
+     * @param array<string|int, array|string|int|float|bool|object>|null $options
+     * @param string                                                     $attributePrefix
      *
      * @return string
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function htmlTag(
         string $name,
         string $content = '',
-        array $options = [],
+        ?array $options = [],
         string $attributePrefix = ''
     ): string {
         /**

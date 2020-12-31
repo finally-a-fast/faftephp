@@ -14,7 +14,7 @@ class BaseObject
     /**
      * BaseObject constructor.
      *
-     * @param array<string, array|string|int|bool|object>|null $config
+     * @param array<string, array|string|int|float|bool|object>|null $config
      */
     public function __construct(?array $config = null)
     {
