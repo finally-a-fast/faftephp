@@ -533,7 +533,7 @@ class Parser extends BaseObject
     //endregion getter and setter
 
     //region init
-    public function init(): void
+    protected function init(): void
     {
         if ($this->logger === null) {
             $this->logger = new NullLogger();

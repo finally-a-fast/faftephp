@@ -13,6 +13,7 @@ use Yiisoft\Validator\Rule\Required;
  * Class FormatAsDate
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{string: \DateTime|string, format: int|string} $data
  */
 class FormatAsDate extends ParserElement
 {

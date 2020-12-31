@@ -7,7 +7,6 @@ include('../vendor/autoload.php');
 use Faf\TemplateEngine\Parser;
 use Yiisoft\Log\Logger;
 use Yiisoft\Log\Target\File\FileTarget;
-use Yiisoft\Cache\Cache;
 use Yiisoft\Cache\Apcu\ApcuCache;
 
 $logFile = __DIR__ . DIRECTORY_SEPARATOR . 'parser.log';
@@ -17,7 +16,7 @@ $logger = new Logger([
   new FileTarget($logFile)
 ]);
 
-$cache = new Cache(new ApcuCache());
+$cache = new ApcuCache();
 
 $fafte = new Parser([
     'logger' => $logger,

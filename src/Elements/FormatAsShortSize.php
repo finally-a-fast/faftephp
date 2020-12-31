@@ -14,6 +14,7 @@ use Yiisoft\Validator\Rule\Required;
  * Class FormatAsShortSize
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{value: int, decimals: int, base: int} $data
  */
 class FormatAsShortSize extends ParserElement
 {
@@ -104,12 +105,11 @@ class FormatAsShortSize extends ParserElement
         ],
     ];
 
-    public const BYTE_PRECISION = [0, 0, 1, 2, 2, 3, 3, 4, 4];
-
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
         $value = $this->data['value'];
         $decimals = $this->data['decimals'];
@@ -120,11 +120,13 @@ class FormatAsShortSize extends ParserElement
         /**
          * Author TyrotoxismB https://gist.github.com/liunian/9338301#gistcomment-3293173
          */
-        for ($i = 0; ($value / $sizeFormatBase) >= 0.9 && $i < count($units); $i++) {
+        $unitCount = count($units);
+
+        for ($i = 0; ($value / $sizeFormatBase) >= 0.9 && $i < $unitCount; $i++) {
             $value /= $sizeFormatBase;
         }
 
-        $value = round($value, is_null($decimals) ? self::BYTE_PRECISION[$i] : $decimals);
+        $value = round($value, $decimals);
         $suffix = $units[$i];
 
         return ($this->parser->formatNumber($value, NumberFormatter::DECIMAL) ?: $value) . ' ' . $suffix;

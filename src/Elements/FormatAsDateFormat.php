@@ -8,7 +8,8 @@ use Faf\TemplateEngine\Helpers\ParserElement;
 
 /**
  * Class FormatAsDateFormat
- * @package fafcms\parser\elements
+ *
+ * @package Faf\TemplateEngine\Elements
  */
 class FormatAsDateFormat extends ParserElement
 {

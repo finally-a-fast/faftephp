@@ -27,7 +27,7 @@ class BaseObject
         $this->init();
     }
 
-    public function init(): void
+    protected function init(): void
     {
     }
 }

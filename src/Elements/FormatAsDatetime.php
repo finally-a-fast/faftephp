@@ -10,7 +10,9 @@ use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class FormatAsDatetime
- * @package fafcms\parser\elements
+ *
+ * @package Faf\TemplateEngine\Elements
+ * @property array{string: \DateTime|string, format: int|string} $data
  */
 class FormatAsDatetime extends ParserElement
 {
