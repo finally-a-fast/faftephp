@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use Exception;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
+use JsonException;
 use Yiisoft\Validator\Rule\InRange;
 use Yiisoft\Validator\Rule\Required;
 
@@ -13,6 +15,7 @@ use Yiisoft\Validator\Rule\Required;
  * Class Get
  *
  * @package fafcms\parser\elements
+ * @property array{format: string, params: array<mixed[]>} $data
  */
 class Get extends ParserElement
 {
@@ -66,8 +69,8 @@ class Get extends ParserElement
 
     /**
      * @return array|false|mixed|string
-     * @throws \JsonException
-     * @throws \Exception
+     * @throws JsonException
+     * @throws Exception
      */
     public function run()
     {

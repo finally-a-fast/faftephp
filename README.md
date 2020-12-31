@@ -8,7 +8,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/finally-a-fast/faftephp?style=flat-square)](https://packagist.org/packages/finally-a-fast/faftephp)
 
 [![Build](https://img.shields.io/gitlab/pipeline/finally-a-fast/faftephp/dev)](https://gitlab.com/finally-a-fast/faftephp/-/pipelines/latest)
-[![Coverage](https://img.shields.io/gitlab/coverage/finally-a-fast/faftephp/dev-master)](https://gitlab.com/finally-a-fast/faftephp/-/pipelines/latest)
+[![Coverage](https://img.shields.io/gitlab/coverage/finally-a-fast/faftephp/dev)](https://gitlab.com/finally-a-fast/faftephp/-/pipelines/latest)
 [![Maintainability](https://img.shields.io/codeclimate/maintainability/finally-a-fast/faftephp)](https://codeclimate.com/github/finally-a-fast/faftephp/maintainability)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://gitlab.com/finally-a-fast/faftephp)
 
