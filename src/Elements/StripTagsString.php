@@ -8,7 +8,8 @@ use Faf\TemplateEngine\Helpers\ParserElement;
 
 /**
  * Class StripTagsString
- * @package fafcms\parser\elements
+ *
+ * @package Faf\TemplateEngine\Elements
  */
 class StripTagsString extends ParserElement
 {
@@ -38,6 +39,7 @@ class StripTagsString extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return array<int|string, mixed>|string|int|float|bool|object|null
      */
     public function run()
     {

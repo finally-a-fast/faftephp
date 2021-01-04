@@ -65,6 +65,7 @@ class VarDump extends ParserElement
     /**
      * {@inheritdoc}
      * @throws Exception
+     * @return false|string
      */
     public function run()
     {

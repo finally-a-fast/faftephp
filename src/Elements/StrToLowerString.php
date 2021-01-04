@@ -8,7 +8,8 @@ use Faf\TemplateEngine\Helpers\ParserElement;
 
 /**
  * Class StrToLowerString
- * @package fafcms\parser\elements
+ *
+ * @package Faf\TemplateEngine\Elements
  */
 class StrToLowerString extends ParserElement
 {
@@ -38,6 +39,7 @@ class StrToLowerString extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return array<int|string, mixed>|string|int|float|bool|object|null
      */
     public function run()
     {

@@ -57,7 +57,7 @@ class Set extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @throws \Exception
+     * @throws Exception
      */
     public function run()
     {

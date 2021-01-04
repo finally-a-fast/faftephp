@@ -9,7 +9,9 @@ use Faf\TemplateEngine\Helpers\ParserElement;
 
 /**
  * Class StripTags
- * @package fafcms\parser\elements
+ *
+ * @package Faf\TemplateEngine\Elements
+ * @property array{string: string, allowable-tags: array|string|null} $data
  */
 class StripTags extends ParserElement
 {
@@ -51,9 +53,14 @@ class StripTags extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
+        /**
+         * @phpstan-ignore-next-line
+         * @psalm-suppress PossiblyInvalidArgument
+         */
         return strip_tags($this->data['string'], $this->data['allowable-tags']);
     }
 }

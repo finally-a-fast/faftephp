@@ -76,7 +76,7 @@ class Call extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @return bool|null|mixed
+     * @return array<int|string, mixed>|string|int|float|bool|object|null
      * @throws Exception
      * @noinspection PhpMissingReturnTypeInspection
      */

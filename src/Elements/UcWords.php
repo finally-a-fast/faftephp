@@ -10,7 +10,9 @@ use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class UcWords
- * @package fafcms\parser\elements
+ *
+ * @package Faf\TemplateEngine\Elements
+ * @property array{string: string, delimiters: string} $data
  */
 class UcWords extends ParserElement
 {
@@ -59,8 +61,9 @@ class UcWords extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
         return ucwords($this->data['string'], $this->data['delimiters']);
     }

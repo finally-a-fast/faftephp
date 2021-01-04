@@ -13,6 +13,7 @@ use Yiisoft\Validator\Rule\Required;
  * Class Trim
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{string: string, charlist: string, full-trim: bool} $data
  */
 class Trim extends ParserElement
 {
@@ -64,8 +65,9 @@ class Trim extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
         if ($this->data['full-trim']) {
             return $this->parser->fullTrim($this->data['string']);

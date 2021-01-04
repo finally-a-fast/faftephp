@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use Faf\TemplateEngine\Helpers\ConditionTrait;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
 
@@ -11,9 +12,12 @@ use Faf\TemplateEngine\Helpers\ParserElement;
  * Class ConditionalStatementConditionEndsNotWith
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{params: array<string|int, array|string|int|float|bool|object>} $data
  */
 class ConditionalStatementConditionEndsNotWith extends ParserElement
 {
+    use ConditionTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -70,11 +74,15 @@ class ConditionalStatementConditionEndsNotWith extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @return bool|mixed
+     * @return bool
      */
-    public function run()
+    public function run(): bool
     {
-        $params = ConditionalStatement::getParams($this->data['params']);
+        $params = $this->getParams($this->data['params']);
+
+        if (!is_string($params[0]) || !is_string($params[1])) {
+            return false;
+        }
 
         $length = strlen($params[1]);
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use Exception;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\DataHelper;
 use Faf\TemplateEngine\Helpers\ParserElement;
@@ -61,9 +62,10 @@ class Param extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @throws \Exception
+     * @return DataHelper
+     * @throws Exception
      */
-    public function run()
+    public function run(): DataHelper
     {
         $this->data['value'] = $this->parser->getRawValue(
             $this->parser->parseElements(
@@ -72,6 +74,7 @@ class Param extends ParserElement
                 true
             )
         );
+
         return new DataHelper($this->data);
     }
 }

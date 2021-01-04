@@ -65,9 +65,9 @@ class TagAttribute extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @throws \Exception
+     * @return DataHelper
      */
-    public function run()
+    public function run(): DataHelper
     {
         return new DataHelper([
             'name' => $this->data['name'],

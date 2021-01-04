@@ -47,9 +47,14 @@ class Htmlspecialchars extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
+        if (!is_string($this->data['string'])) {
+            return '';
+        }
+
         //TODO $flags = ENT_COMPAT | ENT_HTML401, $encoding = 'UTF-8', $double_encode = true
         return htmlspecialchars($this->data['string']);
     }

@@ -20,7 +20,8 @@ class DataHelper extends BaseObject
     public $name;
 
     /**
-     * @var mixed
+     * @var array|string|int|float|bool|object
+     * @psalm-suppress PropertyNotSetInConstructor
      */
     public $value;
 

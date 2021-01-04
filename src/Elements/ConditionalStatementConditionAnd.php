@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use Faf\TemplateEngine\Helpers\ConditionTrait;
 use Faf\TemplateEngine\Helpers\ParserElement;
 
 /**
  * Class ConditionalStatementConditionAnd
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array<int, bool> $content
  */
 class ConditionalStatementConditionAnd extends ParserElement
 {
+    use ConditionTrait;
+
     public bool $contentAsRawData = true;
 
     /**
@@ -49,9 +53,10 @@ class ConditionalStatementConditionAnd extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return bool
      */
-    public function run()
+    public function run(): bool
     {
-        return ConditionalStatement::checkConditionArray('and', $this->content);
+        return $this->checkConditionArray('and', $this->content);
     }
 }

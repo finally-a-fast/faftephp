@@ -6,8 +6,6 @@ namespace Faf\TemplateEngine\Elements;
 
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
-use Yiisoft\Validator\Rule\Boolean;
-use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class Htmlentities
@@ -49,9 +47,14 @@ class Htmlentities extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
+        if (!is_string($this->data['string'])) {
+            return '';
+        }
+
         //TODO $quote_style = null, $charset = null, $double_encode = true
         return htmlentities($this->data['string']);
     }

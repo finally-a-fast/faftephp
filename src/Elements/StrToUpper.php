@@ -50,9 +50,14 @@ class StrToUpper extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
+        if (!is_string($this->data['string'])) {
+            return '';
+        }
+
         return strtoupper($this->data['string']);
     }
 }

@@ -72,6 +72,7 @@ class FormatAsDatetime extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return false|string
      */
     public function run()
     {

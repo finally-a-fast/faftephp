@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use Faf\TemplateEngine\Helpers\ConditionTrait;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
 
@@ -11,9 +12,13 @@ use Faf\TemplateEngine\Helpers\ParserElement;
  * Class ConditionalStatementConditionTypeSafeEqual
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{params: array<string|int, array|string|int|float|bool|object>} $data
+ * @SuppressWarnings(PHPMD.LongClassName)
  */
 class ConditionalStatementConditionTypeSafeEqual extends ParserElement
 {
+    use ConditionTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -70,11 +75,11 @@ class ConditionalStatementConditionTypeSafeEqual extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @return bool|mixed
+     * @return bool
      */
-    public function run()
+    public function run(): bool
     {
-        $params = ConditionalStatement::getParams($this->data['params']);
+        $params = $this->getParams($this->data['params']);
 
         return ($params[0] === $params[1]);
     }

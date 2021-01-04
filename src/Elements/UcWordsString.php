@@ -7,8 +7,9 @@ namespace Faf\TemplateEngine\Elements;
 use Faf\TemplateEngine\Helpers\ParserElement;
 
 /**
- * Class UcWords
- * @package fafcms\parser\elements
+ * Class UcWordsString
+ *
+ * @package Faf\TemplateEngine\Elements
  */
 class UcWordsString extends ParserElement
 {
@@ -38,6 +39,7 @@ class UcWordsString extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return array<int|string, mixed>|string|int|float|bool|object|null
      */
     public function run()
     {

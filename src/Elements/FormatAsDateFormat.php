@@ -39,6 +39,7 @@ class FormatAsDateFormat extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return array<int|string, mixed>|string|int|float|bool|object|null
      */
     public function run()
     {

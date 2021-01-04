@@ -6,7 +6,6 @@ namespace Faf\TemplateEngine\Elements;
 
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
-use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class StrReplace
@@ -67,6 +66,7 @@ class StrReplace extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return array<array-key, mixed>|string
      */
     public function run()
     {

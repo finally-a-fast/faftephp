@@ -48,7 +48,7 @@ abstract class ParserElement extends BaseObject
     protected array $attributes = [];
 
     /**
-     * @var mixed Content of element
+     * @var array<int|string, mixed>|string|int|float|bool|object|null Content of element
      */
     protected $content;
 
@@ -171,7 +171,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @return mixed
+     * @return array<int|string, mixed>|string|int|float|bool|object|null
      */
     public function getContent()
     {
@@ -179,7 +179,7 @@ abstract class ParserElement extends BaseObject
     }
 
     /**
-     * @param mixed $content
+     * @param array<int|string, mixed>|string|int|float|bool|object|null $content
      *
      * @return $this
      */

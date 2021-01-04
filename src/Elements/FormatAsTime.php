@@ -10,7 +10,9 @@ use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class FormatAsTime
- * @package fafcms\parser\elements
+ *
+ * @package Faf\TemplateEngine\Elements
+ * @property array{string: \DateTime|string, format: string|int} $data
  */
 class FormatAsTime extends ParserElement
 {
@@ -70,6 +72,7 @@ class FormatAsTime extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return false|string
      */
     public function run()
     {

@@ -39,9 +39,14 @@ class ParamName extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
+        if (!is_string($this->content)) {
+            return '';
+        }
+
         return $this->parser->fullTrim($this->content);
     }
 }

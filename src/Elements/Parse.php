@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
-use Faf\TemplateEngine\Parser;
+use Exception;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
-use Yiisoft\Validator\Rule\Boolean;
-use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class Parse
@@ -50,7 +48,8 @@ class Parse extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @throws \Exception
+     * @throws Exception
+     * @return array<int|string, mixed>|object|string|null
      */
     public function run()
     {
@@ -65,6 +64,9 @@ class Parse extends ParserElement
          *
          *  $fafte->setData($data);
          */
+        if (!is_string($this->data['string'])) {
+            return null;
+        }
 
         $fafte = $this->parser;
 

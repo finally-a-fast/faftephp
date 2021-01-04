@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use Faf\TemplateEngine\Helpers\ConditionTrait;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
 
@@ -11,9 +12,13 @@ use Faf\TemplateEngine\Helpers\ParserElement;
  * Class ConditionalStatementConditionStartsNotWith
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{params: array<string|int, array|string|int|float|bool|object>} $data
+ * @SuppressWarnings(PHPMD.LongClassName)
  */
 class ConditionalStatementConditionStartsNotWith extends ParserElement
 {
+    use ConditionTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -70,11 +75,15 @@ class ConditionalStatementConditionStartsNotWith extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @return bool|mixed
+     * @return bool
      */
-    public function run()
+    public function run(): bool
     {
-        $params = ConditionalStatement::getParams($this->data['params']);
+        $params = $this->getParams($this->data['params']);
+
+        if (!is_string($params[0]) || !is_string($params[1])) {
+            return false;
+        }
 
         return (strpos($params[0], $params[1]) !== 0);
     }

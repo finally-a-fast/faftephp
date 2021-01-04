@@ -6,6 +6,7 @@ namespace Faf\TemplateEngine\Elements;
 
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
+use JsonException;
 use Yiisoft\Validator\Rule\Required;
 
 /**
@@ -64,9 +65,10 @@ class Tag extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @throws \JsonException
+     * @return string
+     * @throws JsonException
      */
-    public function run()
+    public function run(): string
     {
         $options = $this->data['attributes'];
         unset($options['name'], $options['body']);

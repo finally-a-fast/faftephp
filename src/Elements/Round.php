@@ -12,6 +12,7 @@ use Yiisoft\Validator\Rule\Number;
  * Class Round
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{value: float, precision: int} $data
  */
 class Round extends ParserElement
 {
@@ -61,8 +62,9 @@ class Round extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return float
      */
-    public function run()
+    public function run(): float
     {
         //TODO
         //$val, $precision = 0, $mode = PHP_ROUND_HALF_UP

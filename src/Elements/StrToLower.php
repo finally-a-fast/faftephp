@@ -10,7 +10,8 @@ use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class StrToLower
- * @package fafcms\parser\elements
+ *
+ * @package Faf\TemplateEngine\Elements
  */
 class StrToLower extends ParserElement
 {
@@ -50,9 +51,14 @@ class StrToLower extends ParserElement
 
     /**
      * {@inheritdoc}
+     * @return string
      */
-    public function run()
+    public function run(): string
     {
+        if (!is_string($this->data['string'])) {
+            return '';
+        }
+
         return strtolower($this->data['string']);
     }
 }

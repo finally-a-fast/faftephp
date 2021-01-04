@@ -13,6 +13,11 @@ use Faf\TemplateEngine\Helpers\ParserElement;
  * Class ConditionalStatement
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{
+ *     condition: array<int, bool>|bool,
+ *     then: array|string|int|float|bool|object,
+ *     else: array|string|int|float|bool|object
+ * } $data
  */
 class ConditionalStatement extends ParserElement
 {
@@ -77,10 +82,10 @@ class ConditionalStatement extends ParserElement
             $conditions = [$conditions];
         }
 
+        $content = $this->data['else'];
+
         if (self::checkConditionArray('and', $conditions)) {
             $content = $this->data['then'];
-        } else {
-            $content = $this->data['else'];
         }
 
         if (is_string($content)) {
@@ -91,8 +96,8 @@ class ConditionalStatement extends ParserElement
     }
 
     /**
-     * @param string $type
-     * @param array  $conditions
+     * @param string             $type
+     * @param array<int, bool> $conditions
      *
      * @return bool
      */
@@ -117,9 +122,9 @@ class ConditionalStatement extends ParserElement
     }
 
     /**
-     * @param array $rawParams
+     * @param array<string|int, array|string|int|float|bool|object|DataHelper> $rawParams
      *
-     * @return array
+     * @return array<string|int, array|string|int|float|bool|object>
      */
     public static function getParams(array $rawParams): array
     {

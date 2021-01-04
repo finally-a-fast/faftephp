@@ -15,7 +15,7 @@ use Yiisoft\Validator\Rule\Required;
  * Class Get
  *
  * @package fafcms\parser\elements
- * @property array{format: string, params: array<mixed[]>} $data
+ * @property array{format: string, params: array<array|string|int|float|bool|object>} $data
  */
 class Get extends ParserElement
 {

@@ -4,17 +4,27 @@ declare(strict_types=1);
 
 namespace Faf\TemplateEngine\Elements;
 
+use DateTimeZone;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
-use IntlCalendar;
 use IntlDateFormatter;
-use Locale;
+use JsonException;
 use Yiisoft\Validator\Rule\Required;
 
 /**
  * Class TimeTag
  *
  * @package Faf\TemplateEngine\Elements
+ * @property array{
+ *     datetime: string,
+ *     machine-format: int|string,
+ *     human-format: int|string,
+ *     input-format: string,
+ *     machine-time-zone: string,
+ *     human-time-zone: string,
+ *     input-time-zone: string,
+ *     attributes: array<string, string>
+ * } $data
  */
 class TimeTag extends ParserElement
 {
@@ -113,9 +123,10 @@ class TimeTag extends ParserElement
 
     /**
      * {@inheritdoc}
-     * @throws \JsonException
+     * @return string
+     * @throws JsonException
      */
-    public function run()
+    public function run(): string
     {
         //TODO default settings from parser
         //'machine_time_default_format', 'yyyy-MM-dd HH:mm:ss';
@@ -123,13 +134,13 @@ class TimeTag extends ParserElement
         $machineTimeZone = null;
 
         if (!empty($this->data['machine-time-zone'])) {
-            $machineTimeZone = new \DateTimeZone($this->data['machine-time-zone']);
+            $machineTimeZone = new DateTimeZone($this->data['machine-time-zone']);
         }
 
         $humanTimeZone = null;
 
         if (!empty($this->data['human-time-zone'])) {
-            $humanTimeZone = new \DateTimeZone($this->data['human-time-zone']);
+            $humanTimeZone = new DateTimeZone($this->data['human-time-zone']);
         }
 
         $options = $this->data['attributes'];
