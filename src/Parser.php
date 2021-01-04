@@ -1589,12 +1589,18 @@ Error: %s',
             $this->data['temp-data-storage'] = [];
         }
 
+        /**
+         * @phpstan-ignore-next-line
+         */
         $count = count($this->data['temp-data-storage']);
-        $tempName = 'temp-data-storage.' . $count;//.?
+        $tempName = 'temp-data-storage.' . $count;
         $this->setAttributeData($tempName, $value);
-        /** @noinspection UselessUnsetInspection */
+
+        /**
+         * @noinspection UselessUnsetInspection
+         */
         unset($value);
-        $value = $tempName;
+        $value = '.' . $tempName;
 
         return $value;
     }
