@@ -993,7 +993,22 @@ class Parser extends BaseObject
                     $this->parentTagName = $this->currentTagName;
                     $this->currentTagName = $tagName;
 
-                    $replacement = $this->parserElements[$tagName]->run();
+                    try {
+                        $replacement = $this->parserElements[$tagName]->run();
+                    } catch (Exception $exception) {
+                        throw new RuntimeException(
+                            sprintf(
+                                'Cannot run element "%s".
+Line: %s
+Code: %s
+Error: %s',
+                                $currentTagName,
+                                (int)$domNode->getLineNo(),
+                                $domNode->outerHTML,
+                                $exception->getMessage()
+                            )
+                        );
+                    }
 
                     $this->parentTagName = $childParentTagName;
                     $this->currentTagName = $childCurrentTagName;
@@ -1283,7 +1298,7 @@ Code: %s
 Error: %s',
                                 $elementSetting->name,
                                 $currentTagName,
-                                $domNode->getLineNo(),
+                                (int)$domNode->getLineNo(),
                                 $domNode->outerHTML,
                                 print_r($result->getErrors(), true)
                             )
@@ -1298,7 +1313,7 @@ Code: %s
 Error: %s',
                             $elementSetting->name,
                             $currentTagName,
-                            $domNode->getLineNo(),
+                            (int)$domNode->getLineNo(),
                             $domNode->outerHTML,
                             $exception->getMessage()
                         )
