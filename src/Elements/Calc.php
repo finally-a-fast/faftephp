@@ -71,6 +71,12 @@ class Calc extends ParserElement
     {
         $equation = $this->data['equation'];
 
-        return EosParser::solve($equation);
+        $result = EosParser::solve($equation);
+
+        if (is_string($result)) {
+            $result = (float)$result;
+        }
+
+        return $result;
     }
 }
