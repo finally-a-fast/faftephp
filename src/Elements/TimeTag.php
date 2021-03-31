@@ -92,22 +92,25 @@ class TimeTag extends ParserElement
                 //'element' => TimeTagInputFormat::class,
             ]),
             new ElementSetting([
+                'name' => 'input-time-zone',
+                'label' => 'Input time zone',
+                'defaultValue' => $this->getParser()->getSetting('default-input-time-zone'),
+                //TODO
+                //'element' => TimeTagInputFormat::class,
+            ]),
+            new ElementSetting([
                 'name' => 'machine-time-zone',
                 'label' => 'Machine time zone',
+                'defaultValue' => $this->getParser()->getSetting('default-display-time-zone'),
                 //TODO
                 //'element' => TimeTagMachineFormat::class,
             ]),
             new ElementSetting([
                 'name' => 'human-time-zone',
                 'label' => 'Human time zone',
+                'defaultValue' => $this->getParser()->getSetting('default-display-time-zone'),
                //TODO
                //'element' => TimeTagHumanFormat::class,
-            ]),
-            new ElementSetting([
-                'name' => 'input-time-zone',
-                'label' => 'Input time zone',
-                //TODO
-                //'element' => TimeTagInputFormat::class,
             ]),
             new ElementSetting([
                 'name' => 'attributes',
@@ -131,6 +134,12 @@ class TimeTag extends ParserElement
         //TODO default settings from parser
         //'machine_time_default_format', 'yyyy-MM-dd HH:mm:ss';
         //'human_time_default_format', 'medium';
+        $inputTimeZone = null;
+
+        if (!empty($this->data['input-time-zone'])) {
+            $inputTimeZone = new DateTimeZone($this->data['input-time-zone']);
+        }
+
         $machineTimeZone = null;
 
         if (!empty($this->data['machine-time-zone'])) {
@@ -158,6 +167,7 @@ class TimeTag extends ParserElement
         $options['datetime'] = $this->parser->formatDateTime(
             $this->data['datetime'],
             $this->data['machine-format'],
+            $inputTimeZone,
             $machineTimeZone
         );
 
@@ -166,6 +176,7 @@ class TimeTag extends ParserElement
             $this->parser->formatDateTime(
                 $this->data['datetime'],
                 $this->data['human-format'],
+                $inputTimeZone,
                 $humanTimeZone
             ) ?: '',
             $options

@@ -73,6 +73,6 @@ class Tag extends ParserElement
         $options = $this->data['attributes'];
         unset($options['name'], $options['body']);
 
-        return $this->parser->htmlTag($this->data['name'], $this->data['body'] ?? '', $options);
+        return $this->parser->htmlTag($this->data['name'], (string)$this->data['body'] ?? '', $options);
     }
 }

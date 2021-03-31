@@ -323,6 +323,11 @@ class Parser extends BaseObject
      * @var HTML5DOMDocument
      */
     protected HTML5DOMDocument $htmlTagDom;
+
+    /**
+     * @var array
+     */
+    protected array $settings = [];
     //endregion properties
 
     //region getter and setter
@@ -531,6 +536,58 @@ class Parser extends BaseObject
     {
         return $this->nodeStats;
     }
+
+    /**
+     * @return array
+     */
+    public function getSettings(): array
+    {
+        return $this->settings;
+    }
+
+    /**
+     * @param array $settings
+     *
+     * @return Parser
+     */
+    public function setSettings(array $settings): self
+    {
+        $this->settings = $settings;
+        return $this;
+    }
+
+    /**
+     * @param array $settings
+     *
+     * @return Parser
+     */
+    public function addSettings(array $settings): self
+    {
+        $this->settings = array_merge($this->settings, $settings);
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return mixed|null
+     */
+    public function getSetting(string $name)
+    {
+        return $this->settings[$name] ?? null;
+    }
+
+    /**
+     * @param string $name
+     * @param        $value
+     *
+     * @return Parser
+     */
+    public function setSetting(string $name, $value): self
+    {
+        $this->settings[$name] = $value;
+        return $this;
+    }
     //endregion getter and setter
 
     //region init
@@ -688,12 +745,25 @@ class Parser extends BaseObject
      * @param int                            $type
      * @param DateTime|string                $dateTime
      * @param string|int                     $format
+     * @param IntlTimeZone|DateTimeZone|null $inputTimeZone
      * @param IntlTimeZone|DateTimeZone|null $timeZone
      *
      * @return false|string
      */
-    protected function dateTimeFormatter(int $type, $dateTime, $format, $timeZone)
+    protected function dateTimeFormatter(int $type, $dateTime, $format, $inputTimeZone = null, $timeZone = null)
     {
+        if ($inputTimeZone === null) {
+            $inputTimeZone = new DateTimeZone(date_default_timezone_get());
+        }
+
+        if ($timeZone === null) {
+            $timeZone = new DateTimeZone(date_default_timezone_get());
+        }
+
+        if (is_string($dateTime)) {
+            $dateTime = new DateTime($dateTime, $inputTimeZone);
+        }
+
         $calendar = IntlCalendar::fromDateTime($dateTime);
         $calendar->setTimeZone($timeZone);
 
@@ -739,39 +809,42 @@ class Parser extends BaseObject
     }
 
     /**
-     * @param DateTime|string               $dateTime
+     * @param DateTime|string                $dateTime
      * @param string|int                     $format
+     * @param IntlTimeZone|DateTimeZone|null $inputTimeZone
      * @param IntlTimeZone|DateTimeZone|null $timeZone
      *
      * @return false|string
      */
-    public function formatDateTime($dateTime, $format, $timeZone = null)
+    public function formatDateTime($dateTime, $format, $inputTimeZone = null, $timeZone = null)
     {
-        return $this->dateTimeFormatter(self::FORMAT_TYPE_DATE_TIME, $dateTime, $format, $timeZone);
+        return $this->dateTimeFormatter(self::FORMAT_TYPE_DATE_TIME, $dateTime, $format, $inputTimeZone, $timeZone);
     }
 
     /**
-     * @param DateTime|string               $time
+     * @param DateTime|string                $time
      * @param string|int                     $format
+     * @param IntlTimeZone|DateTimeZone|null $inputTimeZone
      * @param IntlTimeZone|DateTimeZone|null $timeZone
      *
      * @return false|string
      */
-    public function formatTime($time, $format, $timeZone = null)
+    public function formatTime($time, $format, $inputTimeZone = null, $timeZone = null)
     {
-        return $this->dateTimeFormatter(self::FORMAT_TYPE_TIME, $time, $format, $timeZone);
+        return $this->dateTimeFormatter(self::FORMAT_TYPE_TIME, $time, $format, $inputTimeZone, $timeZone);
     }
 
     /**
-     * @param DateTime|string               $date
+     * @param DateTime|string                $date
      * @param string|int                     $format
+     * @param IntlTimeZone|DateTimeZone|null $inputTimeZone
      * @param IntlTimeZone|DateTimeZone|null $timeZone
      *
      * @return false|string
      */
-    public function formatDate($date, $format, $timeZone = null)
+    public function formatDate($date, $format, $inputTimeZone = null, $timeZone = null)
     {
-        return $this->dateTimeFormatter(self::FORMAT_TYPE_DATE, $date, $format, $timeZone);
+        return $this->dateTimeFormatter(self::FORMAT_TYPE_DATE, $date, $format, $inputTimeZone, $timeZone);
     }
 
     /**
@@ -930,7 +1003,7 @@ class Parser extends BaseObject
 
         $dom = new HTML5DOMDocument();
         $dom->loadHTML(
-            '<!DOCTYPE html><html lang=""><body><' . $this->tempTagName . '>' .
+            '<!DOCTYPE html><html lang=""><head><meta charset="UTF-8"></head><body><' . $this->tempTagName . '>' .
             $this->getSafeHtml($string) .
             '</' . $this->tempTagName . '></body></html>',
             LIBXML_NONET | HTML5DOMDocument::ALLOW_DUPLICATE_IDS
@@ -1054,15 +1127,25 @@ Error: %s',
 
     /**
      * @param string $string
+     * @param bool   $trimUtf8Nbsp
+     * @param bool   $trimHtmlNbsp Only works when $trimUtf8Nbsp is true
      *
      * @return string
      */
-    public function fullTrim(string $string): string
+    public function fullTrim(string $string, bool $trimUtf8Nbsp = true, bool $trimHtmlNbsp = false): string
     {
-        return trim(
-            str_replace('&nbsp;', mb_chr(0xA0, 'UTF-8'), $string),
-            " \t\n\r\0\x0B" . mb_chr(0xC2, 'UTF-8') . mb_chr(0xA0, 'UTF-8')
-        );
+        if ($trimUtf8Nbsp) {
+            if ($trimHtmlNbsp) {
+                $string = str_replace('&nbsp;', "\xC2\xA0", $string);
+            }
+
+            return trim(
+                $string,
+                " \t\n\r\0\x0B\xC2\xA0"
+            );
+        }
+
+        return trim($string);
     }
 
     protected array $specialTagMap = [];
@@ -1269,7 +1352,7 @@ Element contains multiple "%s" child elements but only one is allowed!',
             }
         }
 
-        //Set data to make it possible to access other properties in validation
+        // Set data to make it possible to access other properties in validation
         $parserElement->setData($data);
 
         if ($elementSettings !== []) {

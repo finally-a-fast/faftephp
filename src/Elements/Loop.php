@@ -55,9 +55,6 @@ class Loop extends ParserElement
                 'label' => 'Each',
                 'safeData' => false,
                 'element' => LoopEach::class,
-                'rules' => [
-                    new Required(),
-                ]
             ]),
             new ElementSetting([
                 'name' => 'loop-as',
@@ -147,35 +144,37 @@ class Loop extends ParserElement
          */
         $loopItems = $this->parser->getRawValue($loopEach);
 
-        $data = $this->parser->data[$loopAs] ?? null;
+        if ($loopItems !== null && is_countable($loopItems)) {
+            $data = $this->parser->data[$loopAs] ?? null;
 
-        $numericIndex = 0;
-        $wrapStore = '';
-        $itemCount = count($loopItems) - 1;
+            $numericIndex = 0;
+            $wrapStore = '';
+            $itemCount = count($loopItems) - 1;
 
-        foreach ($loopItems as $loopIndex => $loopItem) {
-            /**
-             * @var string|int $currentIndex
-             */
-            $currentIndex = ((is_numeric($loopIndex)) ? $loopIndex + 1 : $loopIndex);
+            foreach ($loopItems as $loopIndex => $loopItem) {
+                /**
+                 * @var string|int $currentIndex
+                 */
+                $currentIndex = ((is_numeric($loopIndex)) ? $loopIndex + 1 : $loopIndex);
 
-            $this->setLoopItemData($loopEach, $loopAs, $currentIndex, $numericIndex, $loopItem);
+                $this->setLoopItemData($loopEach, $loopAs, $currentIndex, $numericIndex, $loopItem);
 
-            $result .= $this->handleLoopItem(
-                $wrapStep,
-                $numericIndex,
-                $body,
-                $itemCount,
-                $wrapTag,
-                $wrapStore,
-                $wrapOptions
-            );
+                $result .= $this->handleLoopItem(
+                    $wrapStep,
+                    $numericIndex,
+                    $body,
+                    $itemCount,
+                    $wrapTag,
+                    $wrapStore,
+                    $wrapOptions
+                );
 
-            $numericIndex++;
-        }
+                $numericIndex++;
+            }
 
-        if ($data !== null) {
-            $this->data[$loopAs] = $data;
+            if ($data !== null) {
+                $this->data[$loopAs] = $data;
+            }
         }
 
         return $result;
@@ -195,6 +194,8 @@ class Loop extends ParserElement
         int $numericIndex,
         $loopItem
     ): void {
+        $loopEach = ltrim($loopEach, '.');
+
         $this->parser->data[$loopEach . '.$$index'] = $currentIndex;
         $this->parser->data[$loopAs . '.$$index'] = $currentIndex;
         $this->parser->data[$loopEach . '.$$numericIndex'] = $numericIndex;
