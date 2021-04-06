@@ -102,7 +102,8 @@ use Faf\TemplateEngine\Elements\{Base64Decode,
     UcWords,
     UcWordsDelimiters,
     UcWordsString,
-    VarDump};
+    VarDump
+};
 use Faf\TemplateEngine\Helpers\BaseObject;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
@@ -114,6 +115,7 @@ use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use Exception;
+use ErrorException;
 use RuntimeException;
 use Yiisoft\Validator\Rules;
 
@@ -1068,7 +1070,7 @@ class Parser extends BaseObject
 
                     try {
                         $replacement = $this->parserElements[$tagName]->run();
-                    } catch (Exception $exception) {
+                    } catch (ErrorException $exception) {
                         throw new RuntimeException(
                             sprintf(
                                 'Cannot run element "%s".

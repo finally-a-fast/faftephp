@@ -106,8 +106,8 @@ class TimeTag extends ParserElement
                 //'element' => TimeTagMachineFormat::class,
             ]),
             new ElementSetting([
-                'name' => 'human-time-zone',
-                'label' => 'Human time zone',
+                'name' => 'display-time-zone',
+                'label' => 'Display time zone',
                 'defaultValue' => $this->getParser()->getSetting('default-display-time-zone'),
                //TODO
                //'element' => TimeTagHumanFormat::class,
@@ -146,10 +146,10 @@ class TimeTag extends ParserElement
             $machineTimeZone = new DateTimeZone($this->data['machine-time-zone']);
         }
 
-        $humanTimeZone = null;
+        $displayTimeZone = null;
 
-        if (!empty($this->data['human-time-zone'])) {
-            $humanTimeZone = new DateTimeZone($this->data['human-time-zone']);
+        if (!empty($this->data['display-time-zone'])) {
+            $displayTimeZone = new DateTimeZone($this->data['display-time-zone']);
         }
 
         $options = $this->data['attributes'];
@@ -160,7 +160,7 @@ class TimeTag extends ParserElement
             $options['human-format'],
             $options['input-format'],
             $options['machine-time-zone'],
-            $options['human-time-zone'],
+            $options['display-time-zone'],
             $options['input-time-zone']
         );
 
@@ -177,7 +177,7 @@ class TimeTag extends ParserElement
                 $this->data['datetime'],
                 $this->data['human-format'],
                 $inputTimeZone,
-                $humanTimeZone
+                $displayTimeZone
             ) ?: '',
             $options
         );
