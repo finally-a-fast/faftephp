@@ -1444,7 +1444,14 @@ Error: %s',
             $data = &$this->data;
         }
 
-        return self::getValue($data, $name, $callLastClosure);
+        try {
+            return self::getValue($data, $name, $callLastClosure);
+        } catch (Exception $e) {
+            $this->getLogger()->warning($e->getMessage());
+
+            $value = null;
+            return $value;
+        }
     }
 
     /**
