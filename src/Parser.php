@@ -67,6 +67,7 @@ use Faf\TemplateEngine\Elements\{Base64Decode,
     HtmlspecialcharsDecode,
     HtmlspecialcharsDecodeString,
     HtmlspecialcharsString,
+    JsonDecode,
     JsonEncode,
     Loop,
     LoopAs,
@@ -102,8 +103,7 @@ use Faf\TemplateEngine\Elements\{Base64Decode,
     UcWords,
     UcWordsDelimiters,
     UcWordsString,
-    VarDump
-};
+    VarDump};
 use Faf\TemplateEngine\Helpers\BaseObject;
 use Faf\TemplateEngine\Helpers\ElementSetting;
 use Faf\TemplateEngine\Helpers\ParserElement;
@@ -161,6 +161,7 @@ class Parser extends BaseObject
         Get::class,
         GetFormat::class,
         JsonEncode::class,
+        JsonDecode::class,
         Param::class,
         ParamName::class,
         ParamValue::class,
